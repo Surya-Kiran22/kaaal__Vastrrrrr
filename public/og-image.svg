@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" role="img" aria-label="Kaal Vastr — Dark by design">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1A1A1E"/>
+      <stop offset="1" stop-color="#0B0B0D"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+  <g stroke="#C9C9D1" stroke-opacity="0.12">
+    <path d="M0 158h1200M0 472h1200"/>
+  </g>
+  <text x="600" y="286" fill="#FFFFFF" font-family="Bodoni Moda, Georgia, serif" font-size="88" letter-spacing="2" text-anchor="middle">KAAL VASTR</text>
+  <text x="600" y="344" fill="#8A8A93" font-family="Inter, system-ui, sans-serif" font-size="22" letter-spacing="10" text-anchor="middle">DARK BY DESIGN</text>
+  <path d="M520 392h160" stroke="#C9C9D1" stroke-opacity="0.5"/>
+</svg>

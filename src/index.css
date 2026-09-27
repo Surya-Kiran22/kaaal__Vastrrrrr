@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --kv-bg: 11 11 13;
+    --kv-surface: 19 19 22;
+    --kv-raised: 26 26 30;
+    --kv-line: 38 38 43;
+  }
+
+  * {
+    @apply border-kv-line;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  body {
+    @apply bg-kv-bg text-kv-white font-sans antialiased;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    @apply bg-kv-white text-kv-bg;
+  }
+
+  /* Focus ring: one consistent treatment across the whole app. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-kv-white/70 ring-offset-2 ring-offset-kv-bg;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-kv-bg;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full border-[3px] border-solid border-kv-bg bg-kv-line;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-kv-lineStrong;
+  }
+
+  /* Hide number input spinners — quantity uses custom steppers. */
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  /* Autofill in dark mode otherwise flashes a white background. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #e8e8ec;
+    -webkit-box-shadow: 0 0 0 1000px #131316 inset;
+    caret-color: #e8e8ec;
+  }
+}
+
+@layer components {
+  .container-kv {
+    @apply container mx-auto;
+  }
+
+  /* Section eyebrow: the small caps label above headings. */
+  .eyebrow {
+    @apply text-2xs font-semibold uppercase tracking-widest2 text-kv-muted;
+  }
+
+  .heading-display {
+    @apply font-display text-4xl font-normal leading-[1.05] tracking-tight text-kv-white sm:text-5xl lg:text-6xl;
+  }
+
+  /* Hairline divider with a silver fade at the edges. */
+  .rule-silver {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(201 201 209 / 0.35), transparent);
+  }
+
+  /* Subtle top-light used on dark cards to suggest a surface edge. */
+  .edge-light {
+    position: relative;
+  }
+  .edge-light::before {
+    content: '';
+    position: absolute;
+    inset-inline: 12%;
+    top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.22), transparent);
+    pointer-events: none;
+  }
+
+  .shimmer {
+    @apply relative overflow-hidden bg-kv-raised;
+  }
+  .shimmer::after {
+    content: '';
+    @apply absolute inset-0 -translate-x-full;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.05), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+
+  /* Product image frame keeps every card the same height while loading. */
+  .media-frame {
+    @apply relative w-full overflow-hidden bg-kv-raised;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .text-pretty {
+    text-wrap: pretty;
+  }
+  /* Visible only to screen readers. */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    @apply sr-only;
+  }
+}

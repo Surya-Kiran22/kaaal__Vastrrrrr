@@ -1,0 +1,100 @@
+-- ===========================================================================
+-- Kaal Vastr — owner-run bootstrap notes (run AFTER the numbered migrations)
+--
+-- This file intentionally contains NO `create function` statements.
+--
+-- An earlier version of this file redefined `promote_to_admin`. Pasting it
+-- after the migrations would have silently replaced the audited, hardened
+-- version from 20260101001000_staff_account_lifecycle.sql with an older one
+-- that skipped the `staff_account_events` write and left `status` untouched.
+-- All of those functions now live in the migrations, which are the only place
+-- they are defined.
+--
+-- What is left here are the operations that genuinely need the owner, plus
+-- notes on why the obvious-looking SQL is the wrong way to do them.
+-- ===========================================================================
+
+-- ---------------------------------------------------------------------------
+-- 1. The very first admin.
+--
+--    There is no way to do this in SQL alone, and that is by design: every
+--    promotion function refuses to run unless the caller is already an active
+--    admin, and an empty project has nobody. Bootstrapping from a privileged
+--    connection is the one place the rule has to bend.
+--
+--    Use the script, which goes through the real signup trigger so the profile
+--    is created exactly as a customer's would be:
+--
+--      npm run admin:bootstrap -- owner@example.com
+--
+--    It prints a generated password. Save it, then change it through the app.
+--    The script refuses to run if an active admin already exists unless you
+--    pass --force.
+--
+--    Verify it with a real sign-in rather than trusting the database:
+--
+--      npm run verify:admin
+-- ---------------------------------------------------------------------------
+
+--  NOT this — a raw UPDATE as superuser bypasses the trigger, writes no audit
+--  row, and leaves `status` as whatever it was (a brand-new profile is
+--  'invited'), producing an admin whose console the guard rejects:
+--
+--    update public.profiles
+--       set role = 'admin', is_active = true
+--     where lower(email) = 'owner@example.com';
+
+-- ---------------------------------------------------------------------------
+-- 2. Adding staff after that.
+--
+--    Do it from the admin UI ("Staff & admin accounts"), or from the CLI when
+--    the Edge Function is not deployed:
+--
+--      npm run staff:manage -- invite someone@example.com --role staff
+--      npm run staff:manage -- confirm someone@example.com
+--      npm run staff:manage -- reset someone@example.com
+--
+--    Both paths write a `staff_account_events` row and both go through
+--    `set_account_role` or its equivalent, so the audit trail is complete.
+-- ---------------------------------------------------------------------------
+
+-- ---------------------------------------------------------------------------
+-- 3. Offboarding a leaver.
+--
+--    Suspend rather than delete. The order history and the audit trail both
+--    reference the profile, and the order rows must keep rendering the name
+--    and delivery snapshot that were captured at purchase time.
+--
+--      npm run staff:manage -- suspend former.staff@example.com
+--
+--    Or, from the UI. Or, if you are already signed in as an admin:
+--
+--      select public.set_account_role('former.staff@example.com', 'staff', true);
+--
+--    The third argument is `suspend`, and it always re-supplies the role, so
+--    the call above leaves the account a suspended member of staff rather than
+--    demoting it to customer.
+--
+--  NOT this:
+--
+--    update public.profiles set is_active = false where ...;
+--
+--  It is wrong three ways. It writes no audit row. It leaves `status` as
+--  'active', so the admin UI reports the account as active while the console
+--  guard (`can_use_staff_console`) correctly refuses it. And on a customer row
+--  the `profiles_role_guard` trigger silently forces `is_active` back to true,
+--  so the statement appears to succeed and does nothing at all.
+-- ---------------------------------------------------------------------------
+
+-- ---------------------------------------------------------------------------
+-- 4. Sanity check after any of the above.
+-- ---------------------------------------------------------------------------
+
+-- select role, status, is_active, count(*)
+--   from public.profiles group by 1, 2, 3 order by 1;
+--
+-- select kind, count(*)
+--   from public.staff_account_events group by 1 order by 2 desc;
+--
+-- Expect exactly one active admin unless you have deliberately added more.
+-- Every row in the second query should correspond to something you did.
