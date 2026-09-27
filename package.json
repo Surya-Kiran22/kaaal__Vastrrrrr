@@ -14,13 +14,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -b --noEmit",
-    "verify:auth": "node --env-file=.env scripts/verify-customer-auth.mjs",
-    "verify:staff": "node --env-file=.env scripts/verify-staff-dispatch.mjs",
     "admin:bootstrap": "node --env-file=.env scripts/create-first-admin.mjs",
-    "verify:admin": "node --env-file=.env scripts/verify-admin-bootstrap.mjs",
-    "verify:invite": "node --env-file=.env scripts/verify-staff-invite.mjs",
     "staff:manage": "node --env-file=.env scripts/manage-staff.mjs",
-    "db:bundle": "node scripts/build-apply-all.mjs"
+    "db:bundle": "node scripts/build-apply-all.mjs",
+    "db:drift-check": "node scripts/build-drift-check.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.1",

@@ -35,6 +35,20 @@ supabase/.temp/
 supabase/.branches/
 supabase/.env
 
+# Generated SQL bundles. The migrations in supabase/migrations/ are the source
+# of truth; these are rebuilt with `npm run db:bundle` and `npm run db:drift-check`.
+supabase/apply-all.sql
+supabase/tests/pre-migration-drift-check.sql
+supabase/tests/pre-migration-drift-detail.sql
+
+# Local-only database scaffold for the throwaway Docker test database.
+supabase/tests/stub-schemas.sql
+
+# Local verification harness. These drive a live database and need credentials,
+# so they stay on the workstation rather than in the repository.
+scripts/verify-*.mjs
+
+
 # Editor & IDE
 .vscode/*
 !.vscode/extensions.json

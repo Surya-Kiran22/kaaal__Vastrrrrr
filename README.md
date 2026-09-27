@@ -77,9 +77,10 @@ or paste them into the Supabase SQL editor in filename order:
 | `20260101001600_atomic_order_placement.sql` | atomic `place_order`, pickup support |
 | `20260101001700_single_order_writer.sql` | `place_order` becomes the only order writer |
 
-**Shortcut:** `supabase/apply-all.sql` is all seventeen files concatenated into one
-idempotent script. Regenerate it after adding a migration — it is generated, and
-an installer that has fallen behind the migrations is worse than none:
+**Shortcut:** `npm run db:bundle` writes `supabase/apply-all.sql`, all seventeen
+files concatenated into one idempotent script. Regenerate it after adding a
+migration — it is generated and gitignored, and an installer that has fallen
+behind the migrations is worse than none:
 
 ```bash
 npm run db:bundle
@@ -128,7 +129,7 @@ sessions. See `.env.example`:
 ```env
 KV_DB_URL=postgresql://postgres.<ref>:<db-password>@<ref>.<region>.pooler.supabase.com:6543/postgres
 KV_ADMIN_EMAIL=owner@example.com     # an EXISTING active admin
-KV_ADMIN_PASS=...                    # only verify:admin needs this
+KV_ADMIN_PASS=...                    # only the gitignored verify:admin needs this
 ```
 
 `KV_SERVICE_ROLE_KEY` is optional and only for `staff:manage invite|confirm|reset`
@@ -352,9 +353,18 @@ socket is healthy.
 
 ## Verification
 
-These run against a real project, using real sign-ins and real HTTP calls to
-PostgREST and the RPCs — not mocks. They clean up after themselves and leave
-zero rows behind.
+> **Local only, not in this repository.** The `verify:*` scripts drive a live
+> database and need credentials, so they are gitignored and kept on the
+> workstation. A fresh clone will not have them. What *is* tracked is the SQL
+> suite in `supabase/tests/`, which needs no credentials:
+>
+> ```bash
+> psql "$KV_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/place_order.sql
+> ```
+
+On a machine that does have them, the harness runs against a real project using
+real sign-ins and real HTTP calls to PostgREST and the RPCs — not mocks. They
+clean up after themselves and leave zero rows behind:
 
 ```bash
 npm run verify:auth    # customer signup, OTP, RLS, order pricing, address isolation
@@ -388,13 +398,18 @@ refusal that left a row behind would mean the transaction did not roll back.
 
 To run it against a plain PostgreSQL server rather than a project, apply the stub
 first — `auth` and `storage` belong to the Supabase platform and are not in any
-migration here, so without it the bundle cannot apply:
+migration here, so without it the bundle cannot apply. Both the stub and the
+bundle are generated or platform-specific, so neither is in this repository:
 
 ```bash
+npm run db:bundle                                   # writes supabase/apply-all.sql
 psql "$KV_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/stub-schemas.sql
 psql "$KV_DB_URL" -v ON_ERROR_STOP=1 -f supabase/apply-all.sql
 psql "$KV_DB_URL" -v ON_ERROR_STOP=1 -f supabase/tests/place_order.sql
 ```
+
+On a real Supabase project, apply the migrations instead and skip the stub —
+`auth` and `storage` already exist there.
 
 It writes three real orders and does not clean up, so point it at a scratch or
 staging database, never production. It needs `psql` on the path; the `verify:*`
@@ -415,14 +430,14 @@ src/
     staff/           console login, dispatch log
     admin/           overview, products, staff accounts, settings
   types/             shared domain types
-scripts/             admin bootstrap, staff management, verification, bundler
+scripts/             admin bootstrap, staff management, bundler
+                     (the credentialed verify:* harness is gitignored)
 supabase/
   migrations/        17 ordered migrations: schema, RLS, storage, seed, accounts,
                      dispatch, atomic order placement
   functions/         manage-staff (admin-only Edge Function)
   tests/             place_order.sql — acceptance checks for the checkout RPC
-                     stub-schemas.sql — auth/storage stand-in to run off-platform
-  apply-all.sql      GENERATED — `npm run db:bundle`
+  apply-all.sql      GENERATED, gitignored — `npm run db:bundle`
   bootstrap.sql      owner-run notes: first admin, offboarding, sanity checks
   config.toml        local CLI configuration
 ```
