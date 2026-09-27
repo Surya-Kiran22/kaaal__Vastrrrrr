@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { EmptyState, ErrorState, Skeleton, toErrorMessage } from '@/components/ui/states';
+import { StaggerItem, StaggerList } from '@/components/ui/reveal';
 import { useSetOrderStatus, useStaffOrders } from '@/hooks/useAccount';
 import { useAuth } from '@/hooks/useAuth';
 import { useBusinessSettings } from '@/hooks/useProducts';
@@ -149,13 +150,13 @@ export function StaffOrdersPage() {
         // Realtime: a new order, or a status change on one already listed, both
         // arrive without a click. aria-live is what makes a screen reader
         // announce them rather than silently redraw.
-        <ul className="space-y-4" aria-live="polite" aria-label="Orders and their dispatch status">
-          {visible.map((order) => {
+        <StaggerList as="ul" className="space-y-4" aria-live="polite" aria-label="Orders and their dispatch status">
+          {visible.map((order, index) => {
             const options = nextStatuses(order.status);
             const busy = busyId === order.id;
 
             return (
-              <li key={order.id} className="rounded-2xl border border-kv-line bg-kv-card">
+              <StaggerItem as="li" key={order.id} index={index} className="rounded-2xl border border-kv-line bg-kv-card">
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-kv-line px-5 py-4">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -269,10 +270,10 @@ export function StaffOrdersPage() {
                     )}
                   </div>
                 ) : null}
-              </li>
+              </StaggerItem>
             );
           })}
-        </ul>
+        </StaggerList>
         )}
       </ErrorBoundary>
     </div>

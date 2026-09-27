@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { EmptyState, ErrorState, Skeleton, toErrorMessage } from '@/components/ui/states';
+import { StaggerItem, StaggerList } from '@/components/ui/reveal';
 import { useMyOrders, useRequestCancellation } from '@/hooks/useAccount';
 import { formatDateTime, formatPrice } from '@/lib/format';
 import { formatDeliveryAddress } from '@/lib/whatsapp';
@@ -66,9 +67,18 @@ export function AccountOrdersPage() {
           // aria-live: these rows are fed by a realtime subscription, so a status
           // can move from "Placed" to "Dispatched" with no interaction. Without a
           // live region the change is visible but never announced.
-          <ul className="space-y-4" aria-live="polite" aria-label="Your orders and their current status">
-            {orders.data.map((order) => (
-              <li key={order.id} className="rounded-2xl border border-kv-line bg-kv-card">
+          //
+          // The stagger runs on the initial cascade only, so a realtime status
+          // change re-renders the row in place instead of replaying the
+          // animation on every event.
+          <StaggerList
+            as="ul"
+            className="space-y-4"
+            aria-live="polite"
+            aria-label="Your orders and their current status"
+          >
+            {orders.data.map((order, index) => (
+              <StaggerItem as="li" key={order.id} index={index} className="rounded-2xl border border-kv-line bg-kv-card">
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-kv-line px-5 py-4">
                   <div>
                     <p className="font-mono text-xs text-kv-white">{order.reference}</p>
@@ -140,9 +150,9 @@ export function AccountOrdersPage() {
                     </Button>
                   </div>
                 ) : null}
-              </li>
+              </StaggerItem>
             ))}
-          </ul>
+          </StaggerList>
         ) : (
           // headingLevel 2: this is the first heading under the layout's h1, and
           // a hard-coded h3 would skip a level.

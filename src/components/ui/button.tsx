@@ -5,7 +5,12 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-300 ease-premium disabled:pointer-events-none disabled:opacity-45 active:scale-[0.98]',
+  // 200ms rather than 300ms: this transition also carries the press feedback,
+  // and a press that takes a third of a second to acknowledge the tap reads as
+  // lag. Colour changes still look unhurried at this duration.
+  // `ease-premium` is cubic-bezier(0.22, 1, 0.36, 1) — the same curve as
+  // EASE_OUT_EXPO in lib/motion.ts, so CSS and framer-motion motion agree.
+  'relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-200 ease-premium disabled:pointer-events-none disabled:opacity-45 active:scale-[0.97]',
   {
     variants: {
       variant: {

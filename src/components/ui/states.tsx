@@ -75,8 +75,12 @@ export function EmptyState({
       // Announced when a list resolves to empty, which otherwise happens in
       // silence.
       role="status"
+      // `animate-fade-up` rather than a framer-motion variant: this state swaps
+      // in on every list query, and a CSS animation is cheaper than mounting a
+      // motion component per render. index.css already collapses animation
+      // duration under prefers-reduced-motion, so no JS guard is needed.
       className={cn(
-        'flex flex-col items-center justify-center rounded-2xl border border-dashed border-kv-line px-6 py-16 text-center',
+        'animate-fade-up flex flex-col items-center justify-center rounded-2xl border border-dashed border-kv-line px-6 py-16 text-center',
         className,
       )}
     >
@@ -112,7 +116,7 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        'flex flex-col items-center justify-center rounded-2xl border border-kv-danger/25 bg-kv-danger/[0.06] px-6 py-12 text-center',
+        'animate-fade-up flex flex-col items-center justify-center rounded-2xl border border-kv-danger/25 bg-kv-danger/[0.06] px-6 py-12 text-center',
         className,
       )}
     >

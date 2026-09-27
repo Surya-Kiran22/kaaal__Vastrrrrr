@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { EmptyState, ErrorState, Skeleton, toErrorMessage } from '@/components/ui/states';
+import { StaggerItem, StaggerList } from '@/components/ui/reveal';
 import {
   useSetAccountRole,
   useStaffAccounts,
@@ -136,14 +137,16 @@ export function AdminAccountsPage() {
               description="Customer registrations will appear here."
             />
           ) : (
-            <ul className="space-y-3">
-              {(accounts.data ?? []).map((account) => {
+            <StaggerList as="ul" className="space-y-3">
+              {(accounts.data ?? []).map((account, index) => {
                 const isSelf = account.id === profile?.id;
                 const suspended = account.status === 'suspended';
 
                 return (
-                  <li
+                  <StaggerItem
+                    as="li"
                     key={account.id}
+                    index={index}
                     className={cn(
                       'rounded-2xl border bg-kv-card px-5 py-4',
                       suspended ? 'border-kv-danger/25' : 'border-kv-line',
@@ -279,10 +282,10 @@ export function AdminAccountsPage() {
                         </Button>
                       </div>
                     </div>
-                  </li>
+                  </StaggerItem>
                 );
               })}
-            </ul>
+            </StaggerList>
           )}
         </ErrorBoundary>
       </section>
@@ -308,11 +311,20 @@ export function AdminAccountsPage() {
           ) : (events.data ?? []).length === 0 ? (
             <EmptyState title="No activity recorded yet" />
           ) : (
-            <ul className="divide-y divide-kv-line rounded-2xl border border-kv-line bg-kv-card">
-              {(events.data ?? []).map((event) => {
+            <StaggerList
+              as="ul"
+              stagger={0.03}
+              className="divide-y divide-kv-line rounded-2xl border border-kv-line bg-kv-card"
+            >
+              {(events.data ?? []).map((event, index) => {
                 const who = (accounts.data ?? []).find((account) => account.id === event.profile_id);
                 return (
-                  <li key={event.id} className="flex flex-wrap items-baseline justify-between gap-3 px-5 py-3">
+                  <StaggerItem
+                    as="li"
+                    key={event.id}
+                    index={index}
+                    className="flex flex-wrap items-baseline justify-between gap-3 px-5 py-3"
+                  >
                     <div className="min-w-0">
                       <p className="text-xs text-kv-silver">
                         <span className="text-kv-white">{who?.email ?? 'Unknown account'}</span>{' '}
@@ -323,10 +335,10 @@ export function AdminAccountsPage() {
                       ) : null}
                     </div>
                     <p className="shrink-0 text-2xs text-kv-dim">{formatDateTime(event.created_at)}</p>
-                  </li>
+                  </StaggerItem>
                 );
               })}
-            </ul>
+            </StaggerList>
           )}
         </ErrorBoundary>
       </section>

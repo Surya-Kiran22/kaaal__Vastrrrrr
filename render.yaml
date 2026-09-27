@@ -1,0 +1,85 @@
+# Render Blueprint for Kaal Vastr.
+#
+# The app is a Vite single-page app; the database, auth and file storage all
+# live in Supabase. So this is a Render *static site* served from a CDN rather
+# than a web service - there is no server process to run and no `startCommand`.
+#
+# Deploy: Render dashboard -> New -> Blueprint, point it at this repository.
+# The first deploy prompts for the two VITE_ values because they are declared
+# with `sync: false` below. Never put a Supabase secret key here; only the
+# publishable key belongs in a VITE_ variable, since it ships to the browser.
+
+services:
+  - type: web
+    name: kaal-vastr
+    runtime: static
+
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+
+    # Only rebuild when something that can actually change the bundle changes.
+    # Ignoring the database migrations keeps a schema-only commit from
+    # triggering a pointless frontend deploy.
+    buildFilter:
+      paths:
+        - src/**
+        - public/**
+        - scripts/build-*.mjs
+        - package.json
+        - package-lock.json
+        - index.html
+        - vite.config.ts
+        - tailwind.config.ts
+        - postcss.config.js
+        - tsconfig*.json
+        - eslint.config.js
+      ignoredPaths:
+        - supabase/**
+        - scripts/verify-*.mjs
+        - README.md
+
+    autoDeployTrigger: commit
+
+    # A fresh deploy per pull request, so UI changes can be reviewed on a real
+    # URL. Each preview is a static site, so this is cheap.
+    previews:
+      generation: automatic
+
+    # Hash-named assets under /assets are immutable, so they can be cached
+    # hard. index.html must not be, or the SPA would keep booting an old
+    # bundle that references deleted asset files.
+    headers:
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: Permissions-Policy
+        value: camera=(), microphone=(), geolocation=()
+
+    # Client-side router: every path is served by index.html and resolved in
+    # the browser. Without this, a hard refresh on /shop or /account/orders
+    # would 404.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+
+    # Build-time values. `sync: false` makes Render prompt for each one on the
+    # first deploy instead of storing them in this file.
+    envVars:
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
