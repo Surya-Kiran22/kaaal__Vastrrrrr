@@ -39,7 +39,11 @@ export default {
       },
       fontFamily: {
         sans: ['Inter var', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
-        display: ['"Bodoni Moda"', 'Inter', 'Georgia', 'serif'],
+        // Instrument Serif ships a single weight (400), which is all the
+        // display layer uses - .heading-display pins font-normal and no
+        // font-display element asks for bold, so nothing gets synthetically
+        // emboldened. Georgia is the fallback while the webfont loads.
+        display: ['"Instrument Serif"', 'Inter', 'Georgia', 'serif'],
       },
       fontSize: {
         '2xs': ['0.6875rem', { lineHeight: '1rem' }],
