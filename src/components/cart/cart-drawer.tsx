@@ -3,6 +3,7 @@ import { MessageCircle, ShoppingBag, Trash2 } from 'lucide-react';
 import { useCart } from '@/features/cart/cart-context';
 import { useCartDrawer } from '@/features/cart/cart-drawer-context';
 import { useBusinessSettings } from '@/hooks/useProducts';
+import { useAuth } from '@/hooks/useAuth';
 import { useOrderGate } from '@/hooks/useOrderGate';
 import { formatPrice } from '@/lib/format';
 import { CartLineItem } from './cart-line-item';
@@ -22,7 +23,8 @@ export function CartDrawer() {
   const { isOpen, close, isCheckoutOpen, openCheckout, closeCheckout } = useCartDrawer();
   const { lines, totals, isEmpty, setQuantity, removeItem, clearCart } = useCart();
   const { data: business } = useBusinessSettings();
-  const { requireCustomer } = useOrderGate();
+  const { canShop } = useAuth();
+  const { requireCustomer, requestSignIn } = useOrderGate();
 
   return (
     <>
@@ -55,12 +57,22 @@ export function CartDrawer() {
             <SheetBody className="flex flex-col justify-center p-5">
               <EmptyState
                 icon={<ShoppingBag className="h-6 w-6" />}
-                title="Your cart is empty"
-                description="Browse the collection and add a piece you like. Your cart is saved on this device."
+                title={canShop ? 'Your cart is empty' : 'Sign in to start a cart'}
+                description={
+                  canShop
+                    ? 'Browse the collection and add a piece you like. Your cart is saved on this device.'
+                    : 'Browsing is open to everyone, but a cart, your addresses and your order history live in your account. Sign in, add a piece, then order on WhatsApp from here.'
+                }
                 action={
-                  <Button asChild variant="primary" onClick={close}>
-                    <a href="/shop">Start shopping</a>
-                  </Button>
+                  canShop ? (
+                    <Button asChild variant="primary" onClick={close}>
+                      <a href="/shop">Start shopping</a>
+                    </Button>
+                  ) : (
+                    <Button variant="primary" onClick={requestSignIn}>
+                      Sign in
+                    </Button>
+                  )
                 }
               />
             </SheetBody>

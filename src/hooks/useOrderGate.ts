@@ -3,9 +3,13 @@ import { useNavigate } from '@tanstack/react-router';
 import { toast } from 'sonner';
 import { useAuth } from './useAuth';
 
-export type OrderGateBlock =
-  | { blocked: false }
-  | { blocked: true; reason: 'anonymous' | 'unverified' | 'staff' | 'loading' };
+/** The blocked half of OrderGateBlock, named so it can be a parameter type. */
+export type OrderGateDenial = {
+  blocked: true;
+  reason: 'anonymous' | 'unverified' | 'staff' | 'loading';
+};
+
+export type OrderGateBlock = { blocked: false } | OrderGateDenial;
 
 /**
  * Single gate for every "order on WhatsApp" entry point.
@@ -34,34 +38,30 @@ export function useOrderGate(onBlocked?: (block: OrderGateBlock) => void) {
   }, [status, canShop, canUseConsole, isAuthenticated, isEmailVerified]);
 
   /**
-   * Runs `action` when the visitor may order, otherwise explains why not.
-   * Returns true when the action was allowed to proceed.
+   * Explains a block and, where that makes sense, routes the shopper onwards.
+   * Split out of requireCustomer so a caller with nothing to run - the cart's
+   * empty state, for instance - can raise the same prompt without inventing an
+   * empty callback, and so the redirect logic exists in exactly one place.
    */
-  const requireCustomer = useCallback(
-    (action: () => void): boolean => {
-      const block = evaluate();
-
-      if (!block.blocked) {
-        action();
-        return true;
-      }
-
-      onBlocked?.(block);
-
+  const explainBlock = useCallback(
+    (block: OrderGateDenial) => {
       switch (block.reason) {
         case 'loading':
           // Auth is still resolving; saying "sign in" here would be wrong and
           // could bounce a signed-in customer out of the page.
-          return false;
+          return;
         case 'unverified':
           toast.error('Verify your email with the 6-digit code before ordering.');
           void navigate({ to: '/account/verify' });
-          return false;
+          return;
         case 'staff':
           toast.error('Staff accounts cannot place customer orders.');
-          return false;
+          return;
         default:
-          toast('Sign in to order on WhatsApp.', {
+          // Wording is deliberately not "sign in to order on WhatsApp": the same
+          // prompt is raised when adding to the cart and from the cart's empty
+          // state, and "start shopping" is the accurate ask in all three.
+          toast('Sign in to start shopping.', {
             description: 'Your cart, addresses and order history live in your account.',
             action: {
               label: 'Sign in',
@@ -77,11 +77,42 @@ export function useOrderGate(onBlocked?: (block: OrderGateBlock) => void) {
             to: '/account/login',
             search: { redirect: window.location.pathname + window.location.search },
           });
-          return false;
       }
     },
-    [evaluate, navigate, onBlocked],
+    [navigate],
   );
 
-  return { requireCustomer, evaluate };
+  /**
+   * Runs `action` when the visitor may order, otherwise explains why not.
+   * Returns true when the action was allowed to proceed.
+   */
+  const requireCustomer = useCallback(
+    (action: () => void): boolean => {
+      const block = evaluate();
+
+      if (!block.blocked) {
+        action();
+        return true;
+      }
+
+      onBlocked?.(block);
+      explainBlock(block);
+      return false;
+    },
+    [evaluate, explainBlock, onBlocked],
+  );
+
+  /**
+   * Raises the same prompt without running anything. For surfaces that must not
+   * be available to a signed-out visitor at all, and which have no action to
+   * guard.
+   */
+  const requestSignIn = useCallback(() => {
+    const block = evaluate();
+    if (!block.blocked) return;
+    onBlocked?.(block);
+    explainBlock(block);
+  }, [evaluate, explainBlock, onBlocked]);
+
+  return { requireCustomer, requestSignIn, evaluate };
 }

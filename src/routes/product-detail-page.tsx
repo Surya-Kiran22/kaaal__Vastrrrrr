@@ -29,7 +29,7 @@ export function ProductDetailPage() {
   const { slug } = useParams({ from: '/product/$slug' });
   const navigate = useNavigate();
 const { addItem, quantityOf } = useCart();
-const { open: openCart, openCheckout } = useCartDrawer();
+  const { open: openCart } = useCartDrawer();
 const { requireCustomer } = useOrderGate();
   const { data: business } = useBusinessSettings();
 
@@ -88,18 +88,14 @@ const { requireCustomer } = useOrderGate();
 
   const handleAdd = () => {
     if (!validateSelection()) return;
-    // The add is refused for anyone who cannot check out, so the drawer must
-    // not open on top of an unchanged cart.
-    const result = addItem({ product: product!, color, size, quantity, units });
-    if (result.added) openCart();
-  };
-
-  const buyNow = () => {
-    if (!validateSelection()) return;
-    // Buying is the same guarded path as ordering: no session, no order.
+    // Ordering happens in exactly one place now, from the cart, so adding to the
+    // cart is the only action this page offers. It stays gated: an anonymous
+    // visitor gets the sign-in prompt with a way through it, rather than the
+    // bare "please sign in to start shopping" toast that addItem would raise on
+    // its own and which leaves them stuck on a product they cannot buy.
     requireCustomer(() => {
       const result = addItem({ product: product!, color, size, quantity, units });
-      if (result.added) openCheckout();
+      if (result.added) openCart();
     });
   };
 
@@ -293,21 +289,9 @@ const { requireCustomer } = useOrderGate();
               </p>
             ) : null}
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Button size="lg" onClick={handleAdd} disabled={soldOut} block>
-                {soldOut ? 'Sold out' : 'Add to cart'}
-              </Button>
-              <Button
-                size="lg"
-                variant="whatsapp"
-                onClick={buyNow}
-                disabled={soldOut}
-                block
-              >
-                <MessageCircle className="h-4 w-4" />
-                Buy on WhatsApp
-              </Button>
-            </div>
+            <Button size="lg" onClick={handleAdd} disabled={soldOut} block>
+              {soldOut ? 'Sold out' : 'Add to cart'}
+            </Button>
 
             {whatsapp && !soldOut ? (
               <p className="text-center text-2xs text-kv-dim">
