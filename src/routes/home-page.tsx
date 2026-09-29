@@ -190,11 +190,11 @@ export function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* Featured / newest                                                  */}
       {/* ------------------------------------------------------------------ */}
-      <section className="container-kv py-20 lg:py-28">
+      <section className="container-kv py-24">
         <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-5">
           <div>
             <p className="eyebrow">{featured.length > 0 ? 'This season' : 'Latest arrivals'}</p>
-            <h2 className="mt-3 font-display text-3xl tracking-tight text-kv-white sm:text-4xl">
+            <h2 className="mt-4 font-display text-5xl leading-none text-kv-white md:text-7xl">
               {featured.length > 0 ? 'Featured pieces' : 'New in the studio'}
             </h2>
           </div>
@@ -229,7 +229,7 @@ export function HomePage() {
       {/* Pillars                                                            */}
       {/* ------------------------------------------------------------------ */}
       <section className="border-y border-kv-line bg-kv-surface/25">
-        <div className="container-kv py-20 lg:py-24">
+        <div className="container-kv py-24">
           <div className="grid gap-10 md:grid-cols-3 md:gap-8">
             {PILLARS.map((pillar, index) => (
               <Reveal key={pillar.title} delay={index * 0.08}>
@@ -247,12 +247,12 @@ export function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* Store CTA                                                          */}
       {/* ------------------------------------------------------------------ */}
-      <section className="container-kv py-20 lg:py-28">
+      <section className="container-kv py-24">
         <Reveal>
           <div className="relative overflow-hidden rounded-2xl border border-kv-line bg-kv-card px-7 py-14 text-center sm:px-14">
             <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-kv-white/25 to-transparent" />
             <p className="eyebrow">Two taps to order</p>
-            <h2 className="mx-auto mt-4 max-w-2xl font-display text-3xl tracking-tight text-kv-white sm:text-4xl">
+            <h2 className="mx-auto mt-4 max-w-3xl font-display text-4xl leading-[0.95] text-kv-white sm:text-5xl md:text-6xl">
               Pick your size, and we finish the order on WhatsApp
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-pretty text-sm leading-relaxed text-kv-muted sm:text-base">

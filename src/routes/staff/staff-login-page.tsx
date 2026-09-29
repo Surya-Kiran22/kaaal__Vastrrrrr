@@ -68,27 +68,41 @@ export function StaffLoginPage() {
   });
 
   return (
-    <div className="container-kv flex min-h-[70dvh] items-center justify-center py-16">
+    <main
+      id="main"
+      data-console
+      className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4"
+    >
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute -left-32 top-10 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -right-32 bottom-10 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 18 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className="w-full max-w-md"
+        className="relative w-full max-w-md"
       >
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2 text-2xs uppercase tracking-widest text-kv-dim transition-colors hover:text-kv-silver"
-        >
-          <ArrowLeft className="h-3 w-3" aria-hidden />
-          Back to store
-        </Link>
+        <div className="mb-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-kv-line-strong">
+            <span className="gold-text font-display text-2xl tracking-[0.3em]">KV</span>
+          </div>
+          <h1 className="mt-6 text-3xl font-medium">Kaal Vastr</h1>
+          <p className="mt-1 text-xs uppercase tracking-[0.4em] text-kv-muted">Dispatch</p>
+          <p className="mt-4 text-sm text-kv-muted">
+            For store staff. Customers should use the sign-in on the main store.
+          </p>
+          <Link
+            to="/"
+            className="mt-6 inline-flex items-center gap-2 text-2xs uppercase tracking-widest text-kv-dim transition-colors hover:text-kv-silver"
+          >
+            <ArrowLeft className="h-3 w-3" aria-hidden />
+            Back to store
+          </Link>
+        </div>
 
-        <h1 className="mt-7 font-display text-3xl tracking-tight text-kv-white">Dispatch console</h1>
-        <p className="mt-3 text-sm text-kv-muted">
-          For store staff. Customers should use the sign-in on the main store.
-        </p>
-
-        <div className="edge-light mt-8 rounded-2xl border border-kv-line bg-kv-card p-7 shadow-glow">
+        <div className="glass rounded-3xl p-10">
           {!isSupabaseConfigured ? (
             <div className="mb-6 rounded-xl border border-kv-danger/30 bg-kv-danger/[0.08] p-4 text-sm text-kv-danger">
               Supabase is not configured. Copy <code className="font-mono">.env.example</code> to{' '}
@@ -176,7 +190,7 @@ export function StaffLoginPage() {
             Sign in to your account
           </Link>
         </p>
-      </motion.div>
-    </div>
-  );
-}
+        </motion.div>
+      </main>
+    );
+  }

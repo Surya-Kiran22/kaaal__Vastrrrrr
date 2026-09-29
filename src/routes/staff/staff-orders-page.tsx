@@ -97,6 +97,16 @@ export function StaffOrdersPage() {
 
   return (
     <div className="space-y-6">
+      <header>
+        <p className="text-xs uppercase tracking-[0.4em] text-kv-muted">Dispatch</p>
+        <h1 className="mt-2 text-4xl">
+          Orders to <span className="gold-text">fulfil</span>
+        </h1>
+        <p className="mt-1 text-sm text-kv-muted">
+          Every order placed from the storefront, newest first.
+        </p>
+      </header>
+
       {/* aria-pressed, because these are toggles whose state is otherwise
           carried by border colour alone -- the same treatment the admin product
           filters already have. */}

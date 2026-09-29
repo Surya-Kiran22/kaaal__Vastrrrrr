@@ -51,15 +51,14 @@ export function SiteHeader() {
   const consoleTo = isAdmin ? '/admin' : '/staff';
 
   return (
-    <header
-      className={cn(
-        'sticky top-0 z-40 border-b transition-all duration-500 ease-premium',
-        scrolled
-          ? 'border-kv-line bg-kv-bg/85 backdrop-blur-xl supports-[backdrop-filter]:bg-kv-bg/70'
-          : 'border-transparent bg-kv-bg',
-      )}
-    >
-      <div className="container-kv flex h-16 items-center justify-between gap-4 lg:h-[4.5rem]">
+    <header className="sticky top-0 z-40 px-3 py-3 transition-all duration-500 ease-premium md:px-5">
+      <div
+        className={cn(
+          // Reference geometry: a detached, blurred pill rather than a full-bleed bar.
+          'mx-auto flex min-h-14 max-w-[1600px] items-center justify-between gap-4 rounded-full border border-white/10 bg-black/40 px-5 py-3 backdrop-blur-xl md:px-8',
+          scrolled ? 'border-kv-line-strong' : '',
+        )}
+      >
         <Link
           to="/"
           className="group flex items-center gap-2.5"

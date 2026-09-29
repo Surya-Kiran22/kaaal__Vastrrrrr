@@ -116,15 +116,15 @@ export function AdminLoginPage() {
   });
 
   return (
-    <div className="relative flex min-h-[calc(100dvh-6rem)] items-center justify-center px-5 py-16">
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.18]"
-        style={{
-          backgroundImage:
-            'radial-gradient(circle at 50% 0%, rgba(255,255,255,0.14), transparent 55%)',
-        }}
-        aria-hidden
-      />
+    <main
+      id="main"
+      data-console
+      className="relative flex min-h-dvh items-center justify-center overflow-hidden px-4"
+    >
+      <div className="pointer-events-none absolute inset-0" aria-hidden>
+        <div className="absolute -left-32 top-10 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+        <div className="absolute -right-32 bottom-10 h-96 w-96 rounded-full bg-white/5 blur-3xl" />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 18 }}
@@ -133,26 +133,28 @@ export function AdminLoginPage() {
         className="relative w-full max-w-md"
       >
         <div className="mb-8 text-center">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2 text-2xs uppercase tracking-widest text-kv-dim transition-colors hover:text-kv-silver"
-          >
-            <ArrowLeft className="h-3 w-3" aria-hidden />
-            Back to store
-          </Link>
-          <h1 className="mt-7 font-display text-3xl tracking-tight text-kv-white">
-            Staff &amp; admin sign in
-          </h1>
-          <p className="mt-3 text-sm text-kv-muted">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-kv-line-strong">
+            <span className="gold-text font-display text-2xl tracking-[0.3em]">KV</span>
+          </div>
+          <h1 className="mt-6 text-3xl font-medium">Kaal Vastr</h1>
+          <p className="mt-1 text-xs uppercase tracking-[0.4em] text-kv-muted">Command Centre</p>
+          <p className="mt-4 text-sm text-kv-muted">
             The single door to the dispatch and admin consoles. Customers sign in on the{' '}
             <Link to="/account/login" className="underline underline-offset-2 hover:text-kv-silver">
               account page
             </Link>
             .
           </p>
+          <Link
+            to="/"
+            className="mt-6 inline-flex items-center gap-2 text-2xs uppercase tracking-widest text-kv-dim transition-colors hover:text-kv-silver"
+          >
+            <ArrowLeft className="h-3 w-3" aria-hidden />
+            Back to store
+          </Link>
         </div>
 
-        <div className="edge-light rounded-2xl border border-kv-line bg-kv-card p-7 shadow-glow">
+        <div className="glass rounded-3xl p-10">
           {!isSupabaseConfigured ? (
             <div className="mb-6 rounded-xl border border-kv-danger/30 bg-kv-danger/[0.08] p-4 text-sm text-kv-danger">
               Supabase is not configured. Copy <code className="font-mono">.env.example</code> to{' '}
@@ -300,7 +302,7 @@ export function AdminLoginPage() {
             screen. Public registration can never reach this area.
           </p>
         </div>
-      </motion.div>
-    </div>
-  );
-}
+        </motion.div>
+      </main>
+    );
+  }

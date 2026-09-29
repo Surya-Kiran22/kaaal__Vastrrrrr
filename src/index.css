@@ -92,6 +92,7 @@
     @apply bg-kv-bg text-kv-white font-sans antialiased;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
 
   ::selection {
@@ -142,19 +143,10 @@
     @apply container mx-auto;
   }
 
-  /* Section eyebrow: the small caps label above headings. */
+  /* Section eyebrow: the reference sets these as 10px caps with 0.4em tracking
+     against the muted grey, and leaves the accent colour out of them entirely. */
   .eyebrow {
-    @apply text-2xs font-semibold uppercase tracking-widest2 text-kv-muted;
-  }
-  /* Crimson hairline tick - the one place the accent colour appears. */
-  .eyebrow::before {
-    content: '';
-    display: inline-block;
-    width: 1.5rem;
-    height: 1px;
-    margin-right: 0.75rem;
-    vertical-align: middle;
-    background-color: #8b2b20;
+    @apply text-[10px] font-medium uppercase tracking-[0.4em] text-kv-dim;
   }
 
   .heading-display {
@@ -353,6 +345,22 @@
 
 [data-console] .gold-glow {
   box-shadow: none;
+}
+
+/* The reference remaps its own legacy `bg-white/5` and `bg-black/40` surfaces
+   onto the charcoal scale. Without these, a hover row would be a translucent
+   white film over #1C1C1C rather than the flat #262626 the design intends. */
+[data-console] .bg-white\/5 {
+  background-color: rgb(var(--kv-rgb-raised));
+}
+[data-console] .border-white\/5,
+[data-console] .border-white\/10 {
+  border-color: #333333;
+}
+[data-console] .bg-black\/40,
+[data-console] .bg-black\/50,
+[data-console] .bg-black\/60 {
+  background-color: rgb(var(--kv-rgb-raised));
 }
 
 /* Compact table zebra + hover, so long console tables read as one system. */

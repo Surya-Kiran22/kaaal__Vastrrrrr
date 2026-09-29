@@ -1,60 +1,50 @@
-import { Link, Outlet, useRouterState } from '@tanstack/react-router';
-import { ExternalLink, LogOut } from 'lucide-react';
+import { Link, useRouterState } from '@tanstack/react-router';
+import { LayoutDashboard, ListChecks } from 'lucide-react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
-import { PrivacyToggle } from '@/components/console/privacy-toggle';
-import { Button } from '@/components/ui/button';
+import { ConsoleShell, type ConsoleNavItem } from '@/components/console/console-shell';
 import { useAuth } from '@/hooks/useAuth';
 
+/**
+ * The staff dispatch console. Uses the same flat shell as the admin console, so
+ * both read as one product; the sections differ because the jobs differ.
+ */
 export function StaffLayout() {
-  const { profile, signOut, isAdmin } = useAuth();
+  const { isAdmin, signOut } = useAuth();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
+  const items: readonly ConsoleNavItem[] = isAdmin
+    ? [
+        { to: '/staff', label: 'Dispatch log', icon: ListChecks, exact: true },
+        { to: '/admin', label: 'Admin dashboard', icon: LayoutDashboard },
+      ]
+    : [{ to: '/staff', label: 'Dispatch log', icon: ListChecks, exact: true }];
+
   return (
-    <div data-console className="container-kv py-12 lg:py-16">
-      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-kv-line pb-6">
-        <div>
-          <p className="eyebrow">Dispatch console</p>
-          <h1 className="mt-2 font-display text-3xl tracking-tight text-kv-white">
-            {isAdmin ? 'Dispatch log' : 'Orders to fulfil'}
-          </h1>
-          <p className="mt-1 text-sm text-kv-muted">
-            Signed in as {profile?.full_name?.trim() || profile?.email}
-            {isAdmin ? ' · admin, read-only here' : ''}
+    <ConsoleShell
+      items={items}
+      subtitle="Dispatch"
+      signOut={() => void signOut()}
+      footerLinks={
+        <Link
+          to="/shop"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm text-kv-muted transition hover:bg-white/5 hover:text-white"
+        >
+          View store
+        </Link>
+      }
+      banner={
+        isAdmin ? (
+          <p className="rounded-xl border border-kv-line bg-kv-card px-4 py-3 text-sm text-kv-muted">
+            You are signed in as an admin, so this log is read-only. Dispatch status changes belong to staff
+            accounts, and the database rejects admin attempts as well.
           </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <PrivacyToggle />
-          <Button variant="ghost" size="sm" asChild>
-            <Link to="/shop">
-              <ExternalLink className="h-4 w-4" />
-              View store
-            </Link>
-          </Button>
-          {isAdmin ? (
-            <Button variant="ghost" size="sm" asChild>
-              <Link to="/admin">Admin dashboard</Link>
-            </Button>
-          ) : null}
-          <Button variant="ghost" size="sm" onClick={() => void signOut()}>
-            <LogOut className="h-4 w-4" />
-            Sign out
-          </Button>
-        </div>
-      </div>
-
-      {isAdmin ? (
-        <p className="mt-6 rounded-xl border border-kv-line bg-kv-surface/40 px-4 py-3 text-xs text-kv-muted">
-          You are signed in as an admin, so this log is read-only. Dispatch status changes belong to staff
-          accounts, and the database rejects admin attempts as well.
-        </p>
-      ) : null}
-
-      <div className="mt-8">
+        ) : null
+      }
+      wrap={(children) => (
         <ErrorBoundary label="the dispatch log" resetKey={pathname}>
-          <Outlet />
+          {children}
         </ErrorBoundary>
-      </div>
-    </div>
+      )}
+    />
   );
 }

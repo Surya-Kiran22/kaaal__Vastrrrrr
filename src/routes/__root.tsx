@@ -23,6 +23,8 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootLayout() {
+  const pathname = useLocation({ select: (location) => location.pathname });
+
   return (
     <CartProvider>
       <CartDrawerProvider>
@@ -33,18 +35,36 @@ function RootLayout() {
           >
             Skip to content
           </a>
-          <SiteHeader />
-          <main id="main" className="flex-1">
-            <RouteTransition>
-              <Outlet />
-            </RouteTransition>
-          </main>
-          <SiteFooter />
-          <CartDrawer />
+          {/*
+            The staff and admin consoles are a separate product surface: the
+            reference dashboard is a full-bleed dark page with its own sidebar
+            and no storefront chrome, and a sticky sidebar cannot live inside the
+            site header/footer column. So the console renders on its own.
+          */}
+          {isConsolePath(pathname) ? (
+            // No wrapper <main> here: the console shell and the console login
+            // screens each supply their own, so a page never nests two landmarks.
+            <Outlet />
+          ) : (
+            <>
+              <SiteHeader />
+              <main id="main" className="flex-1">
+                <RouteTransition>
+                  <Outlet />
+                </RouteTransition>
+              </main>
+              <SiteFooter />
+              <CartDrawer />
+            </>
+          )}
         </div>
       </CartDrawerProvider>
     </CartProvider>
   );
+}
+
+function isConsolePath(pathname: string): boolean {
+  return pathname === '/admin' || pathname.startsWith('/admin/') || pathname === '/staff' || pathname.startsWith('/staff/');
 }
 
 /**
