@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -b --noEmit",
+    "functions:check": "deno check supabase/functions/manage-staff/index.ts",
     "admin:bootstrap": "node --env-file=.env scripts/create-first-admin.mjs",
     "staff:manage": "node --env-file=.env scripts/manage-staff.mjs",
     "db:bundle": "node scripts/build-apply-all.mjs",

@@ -14,7 +14,7 @@
 // Every action appends a row to `staff_account_events`. Passwords, tokens and
 // links are never written to the audit trail.
 
-import { createClient } from 'npm:@supabase/supabase-js@2';
+import { createClient, type SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
 type Action = 'invite' | 'resend' | 'reset' | 'activate';
 type Role = 'staff' | 'admin';
@@ -353,8 +353,8 @@ Deno.serve(async (request) => {
         email,
         role,
         userId: newId,
-        message: `Invite sent to ${email}. They can sign in from ${redirectTo}.`,
-      }, request);
+          message: `Invite sent to ${email}. They can sign in from ${redirectTo}.`,
+        }, 200, request);
     }
 
     // ------------------------------------------------------------- resend/reset
@@ -409,8 +409,8 @@ Deno.serve(async (request) => {
         email,
         role: target.role,
         userId: user.id,
-        message: `A ${action === 'resend' ? 'setup' : 'password reset'} link was sent to ${email}.`,
-      }, request);
+          message: `A ${action === 'resend' ? 'setup' : 'password reset'} link was sent to ${email}.`,
+        }, 200, request);
     }
 
     // ---------------------------------------------------------------- activate
@@ -445,9 +445,10 @@ Deno.serve(async (request) => {
         email,
         userId: targetId,
         message: `${email} is confirmed. Send a password reset so they can sign in.`,
-      },
-      request,
-    );
+        },
+        200,
+        request,
+      );
   } catch (error) {
     console.error('manage-staff failed', error);
     const message = error instanceof Error ? error.message : 'Unexpected error.';
@@ -455,11 +456,15 @@ Deno.serve(async (request) => {
   }
 });
 
+/**
+ * `createClient` is generic over its key type, so the service-role client
+ * created above is not assignable to the default-typed `ReturnType`. The loose
+ * parameters keep the admin client (and the anon client) usable here.
+ */
+type ServiceRoleClient = SupabaseClient<any, any, any>;
+
 /** `listUsers` is paginated; walk it until the address is found or pages run out. */
-async function findUserId(
-  admin: ReturnType<typeof createClient>,
-  email: string,
-): Promise<string | null> {
+async function findUserId(admin: ServiceRoleClient, email: string): Promise<string | null> {
   for (let page = 1; page <= 10; page += 1) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
     if (error) throw error;

@@ -161,6 +161,7 @@ end $$;
 do $$
 declare
   r record;
+  v_def text;
 begin
   for r in
     select p.oid,
