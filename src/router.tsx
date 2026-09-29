@@ -13,6 +13,7 @@ import { AccountVerifyPage, type AccountVerifySearch } from './routes/account/ac
 import { AdminAccountsPage } from './routes/admin/admin-accounts-page';
 import { AdminLayout } from './routes/admin/admin-layout';
 import { AdminLoginPage, type AdminLoginSearch } from './routes/admin/admin-login-page';
+import { AdminResetPasswordPage } from './routes/admin/admin-reset-password-page';
 import { AdminOverviewPage } from './routes/admin/admin-overview-page';
 import { AdminInventoryPage } from './routes/admin/admin-inventory-page';
 import {
@@ -231,6 +232,17 @@ const adminLoginRoute = createRoute({
   component: AdminLoginPage,
 });
 
+/**
+ * Where console recovery emails land. Deliberately unguarded and top-level: the
+ * emailed token is the only credential, and the session it establishes is what
+ * authorises changing the password.
+ */
+const adminResetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/admin/reset-password',
+  component: AdminResetPasswordPage,
+});
+
 const adminRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/admin',
@@ -309,6 +321,7 @@ const routeTree = rootRoute.addChildren([
   staffLoginRoute,
   staffRoute.addChildren([staffOrdersRoute]),
   adminLoginRoute,
+  adminResetPasswordRoute,
   adminRoute.addChildren([
     adminIndexRoute,
     adminProductsRoute,

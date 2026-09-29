@@ -31,9 +31,9 @@ export function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   /*
-   * Recovery lives here as well as on the customer form. This page is the only
-   * console door, and staff reset emails come back to a console URL, so a reset
-   * link landing anywhere without a password form would be a dead end.
+   * Recovery is requested here as well as on the customer form. This page is the
+   * only console door, so staff reset emails come back to a console URL — they are
+   * redirected on to /admin/reset-password, which is where a new password is set.
    */
   const [recoveryMode, setRecoveryMode] = useState(false);
   const [recoverySent, setRecoverySent] = useState(false);
@@ -61,7 +61,7 @@ export function AdminLoginPage() {
       try {
         await authController.requestPasswordReset(
           values.email,
-          `${window.location.origin}/admin/login`,
+          `${window.location.origin}/admin/reset-password`,
         );
         setRecoverySent(true);
         toast.success('Check the inbox for the reset link.');

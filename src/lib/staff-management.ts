@@ -184,7 +184,7 @@ async function inviteViaPublicApi(email: string, role: ProfileRole): Promise<Sta
   // The emailed link is what actually lets them set a password. A failure here
   // is not fatal to the account, so it is reported as a caveat.
   const { error: emailError } = await supabase.auth.resetPasswordForEmail(trimmed, {
-    redirectTo: `${window.location.origin}/admin/login`,
+    redirectTo: `${window.location.origin}/admin/reset-password`,
   });
 
   return {
@@ -205,7 +205,7 @@ async function emailLinkViaPublicApi(action: 'resend' | 'reset', email: string):
   const trimmed = email.trim().toLowerCase();
 
   const { error } = await supabase.auth.resetPasswordForEmail(trimmed, {
-    redirectTo: `${window.location.origin}/admin/login`,
+    redirectTo: `${window.location.origin}/admin/reset-password`,
   });
   if (error) throw new StaffManagementError(`Could not send the link: ${error.message}`);
 
