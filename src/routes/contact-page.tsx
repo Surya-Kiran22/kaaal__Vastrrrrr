@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Reveal } from '@/components/ui/reveal';
 import { InlineSpinner } from '@/components/ui/states';
 import { useBusinessSettings } from '@/hooks/useProducts';
-import { buildWhatsappChatLink } from '@/lib/whatsapp';
+import { WhatsAppGate } from '@/components/layout/whatsapp-gate';
 
 const FAQS = [
   {
@@ -41,8 +41,7 @@ const FAQS = [
 ];
 
 export function ContactPage() {
-  const { data: business, isPending, isError } = useBusinessSettings();
-  const whatsapp = buildWhatsappChatLink(business?.whatsapp_number);
+    const { data: business, isPending, isError } = useBusinessSettings();
 
   const addressLines = [
     business?.address,
@@ -115,13 +114,17 @@ export function ContactPage() {
                       ? `+${business.whatsapp_number}`
                       : 'Number to be confirmed'}
                   </p>
-                  {whatsapp ? (
-                    <Button asChild variant="whatsapp" size="sm" className="mt-4">
-                      <a href={whatsapp} target="_blank" rel="noopener noreferrer">
-                        <MessageCircle className="h-3.5 w-3.5" />
-                        Start a chat
-                      </a>
-                    </Button>
+                  {business?.whatsapp_number ? (
+                    <WhatsAppGate
+                      number={business.whatsapp_number}
+                      variant="whatsapp"
+                      size="sm"
+                      className="mt-4"
+                      returnTo="/contact"
+                    >
+                      <MessageCircle className="h-3.5 w-3.5" />
+                      Start a chat
+                    </WhatsAppGate>
                   ) : null}
                 </InfoCard>
 

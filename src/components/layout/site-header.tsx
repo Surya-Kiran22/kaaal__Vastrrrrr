@@ -6,7 +6,7 @@ import { useCart } from '@/features/cart/cart-context';
 import { useCartDrawer } from '@/features/cart/cart-drawer-context';
 import { useAuth } from '@/hooks/useAuth';
 import { useBusinessSettings } from '@/hooks/useProducts';
-import { buildWhatsappChatLink } from '@/lib/whatsapp';
+import { WhatsAppGate } from '@/components/layout/whatsapp-gate';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetBody, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -39,7 +39,6 @@ export function SiteHeader() {
     setMenuOpen(false);
   }, [pathname]);
 
-  const whatsapp = buildWhatsappChatLink(business?.whatsapp_number);
   const avatarUrl = profile?.avatar_url ?? null;
   // The username is the preferred label, then the display name, then the email
   // local part. This still resolves while the profile row is mid-refresh and
@@ -213,16 +212,15 @@ export function SiteHeader() {
                   </Link>
                 ))}
                 <div className="rule-silver my-3" />
-                {whatsapp ? (
-                  <a
-                    href={whatsapp}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-medium text-[#052E16]"
+                {business?.whatsapp_number ? (
+                  <WhatsAppGate
+                    number={business.whatsapp_number}
+                    unstyled
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-medium text-[#052E16]"
                   >
                     <MessageCircleIcon />
                     Chat on WhatsApp
-                  </a>
+                  </WhatsAppGate>
                 ) : null}
                 {isAuthenticated ? (
                   <Link

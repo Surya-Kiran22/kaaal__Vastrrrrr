@@ -23,7 +23,8 @@ import { useOrderGate } from '@/hooks/useOrderGate';
 import { useBusinessSettings, useProductBySlug, useProducts } from '@/hooks/useProducts';
 import { discountPercent, formatPrice } from '@/lib/format';
 import { variantUnits } from '@/lib/products';
-import { buildWhatsappChatLink } from '@/lib/whatsapp';
+import { WhatsAppGate } from '@/components/layout/whatsapp-gate';
+import { useAuth } from '@/hooks/useAuth';
 
 export function ProductDetailPage() {
   const { slug } = useParams({ from: '/product/$slug' });
@@ -32,6 +33,7 @@ const { addItem, quantityOf } = useCart();
   const { open: openCart } = useCartDrawer();
 const { requireCustomer } = useOrderGate();
   const { data: business } = useBusinessSettings();
+  const { isAuthenticated, isEmailVerified } = useAuth();
 
   const { data: product, isPending, isError, error, refetch } = useProductBySlug(slug);
   const { data: related = [], isPending: relatedPending } = useProducts({ category: product?.category });
@@ -157,8 +159,6 @@ const { requireCustomer } = useOrderGate();
   const off = discountPercent(product.price, product.compareAt);
   const inCart = quantityOf(product.id, color, size);
   const soldOut = units <= 0;
-  const whatsapp = buildWhatsappChatLink(business?.whatsapp_number);
-
   const relatedProducts = related
     .filter((candidate) => candidate.id !== product.id)
     .slice(0, 4);
@@ -293,18 +293,19 @@ const { requireCustomer } = useOrderGate();
               {soldOut ? 'Sold out' : 'Add to cart'}
             </Button>
 
-            {whatsapp && !soldOut ? (
+            {business?.whatsapp_number && !soldOut ? (
               <p className="text-center text-2xs text-kv-dim">
                 Prefer to talk first?{' '}
-                <a
-                  href={whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <WhatsAppGate
+                  number={business?.whatsapp_number}
+                  unstyled
+                  returnTo={`/product/${slug}`}
                   className="text-kv-silver underline-offset-4 hover:underline"
                 >
-                  Message {business?.business_name ?? 'us'}
-                </a>{' '}
-                about this piece.
+                  {isAuthenticated && isEmailVerified
+                    ? 'message us on WhatsApp'
+                    : 'sign in and verify your email to chat'}
+                </WhatsAppGate>
               </p>
             ) : null}
           </div>

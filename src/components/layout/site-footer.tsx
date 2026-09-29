@@ -1,12 +1,11 @@
 import { Link } from '@tanstack/react-router';
 import { Clock, Facebook, Instagram, Mail, MapPin, MessageCircle, Phone } from 'lucide-react';
 import { useBusinessSettings } from '@/hooks/useProducts';
-import { buildWhatsappChatLink } from '@/lib/whatsapp';
+import { WhatsAppGate } from '@/components/layout/whatsapp-gate';
 import { Button } from '@/components/ui/button';
 
 export function SiteFooter() {
   const { data: business, isPending } = useBusinessSettings();
-  const whatsapp = buildWhatsappChatLink(business?.whatsapp_number);
 
   const addressLines = [business?.address, [business?.city, business?.state, business?.pincode].filter(Boolean).join(' ')]
     .filter(Boolean)
@@ -46,13 +45,11 @@ export function SiteFooter() {
               <p className="mt-4 text-2xs uppercase tracking-widest2 text-kv-dim">{business.tagline}</p>
             ) : null}
 
-            {whatsapp ? (
-              <Button asChild variant="whatsapp" className="mt-7">
-                <a href={whatsapp} target="_blank" rel="noopener noreferrer">
-                  <MessageCircle className="h-4 w-4" />
-                  Order on WhatsApp
-                </a>
-              </Button>
+            {business?.whatsapp_number ? (
+              <WhatsAppGate number={business.whatsapp_number} variant="whatsapp" className="mt-7">
+                <MessageCircle className="h-4 w-4" />
+                Order on WhatsApp
+              </WhatsAppGate>
             ) : null}
           </div>
 

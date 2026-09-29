@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ProductGridSkeleton } from '@/components/ui/states';
 import { Reveal } from '@/components/ui/reveal';
 import { useBusinessSettings, useCategories, useProducts } from '@/hooks/useProducts';
-import { buildWhatsappChatLink } from '@/lib/whatsapp';
+import { WhatsAppGate } from '@/components/layout/whatsapp-gate';
 
 const PILLARS = [
   {
@@ -35,8 +35,7 @@ export function HomePage() {
   });
   const { data: newest = [], isPending: newestPending } = useProducts({ sort: 'newest' });
 
-  const reduceMotion = useReducedMotion();
-  const whatsapp = buildWhatsappChatLink(business?.whatsapp_number);
+    const reduceMotion = useReducedMotion();
 
   // Fall back to the newest arrivals if nothing is flagged as featured.
   const showcase = (featured.length > 0 ? featured : newest).slice(0, 8);
@@ -115,13 +114,16 @@ export function HomePage() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
-              {whatsapp ? (
-                <Button asChild variant="outline" size="lg">
-                  <a href={whatsapp} target="_blank" rel="noopener noreferrer">
-                    <MessageCircle className="h-4 w-4" />
-                    Talk to us
-                  </a>
-                </Button>
+              {business?.whatsapp_number ? (
+                <WhatsAppGate
+                  number={business.whatsapp_number}
+                  variant="outline"
+                  size="lg"
+                  returnTo="/"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  Talk to us
+                </WhatsAppGate>
               ) : null}
             </motion.div>
 
