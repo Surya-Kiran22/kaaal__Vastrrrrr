@@ -43,28 +43,65 @@ const ALLOWED_ROLES: readonly Role[] = ['staff', 'admin'];
  * the fact that the endpoint exists and turns a CSRF attempt into a simple
  * cross-site request.
  */
-const ALLOWED_ORIGINS: readonly string[] = (Deno.env.get('ALLOWED_REDIRECT_ORIGINS') ?? '')
+const RAW_ALLOWED_ORIGINS: readonly string[] = (Deno.env.get('ALLOWED_REDIRECT_ORIGINS') ?? '')
   .split(',')
   .map((value) => value.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
-const ALLOWED_EXTRA_ORIGINS: readonly string[] = ALLOWED_ORIGINS;
+/** Exact origins, e.g. `https://kaalvastr.in`. */
+const ALLOWED_ORIGINS: readonly string[] = RAW_ALLOWED_ORIGINS.filter(
+  (value) => !value.includes('*'),
+);
+
+/**
+ * Host suffixes from wildcard entries, e.g. `https://*.vercel.app` -> `.vercel.app`.
+ *
+ * Vercel gives every deploy its own hostname, so an exact-match list would need a
+ * secret edit before each preview build could call this function. The wildcard
+ * stays https-only and host-scoped: any site on the internet is still refused.
+ */
+const ALLOWED_ORIGIN_SUFFIXES: readonly string[] = RAW_ALLOWED_ORIGINS.filter((value) =>
+  value.includes('*'),
+).map((value) => value.replace(/^https:\/\/\*/i, '').replace(/\/+$/, ''));
+
+function originAllowed(origin: string | null): string | null {
+  if (!origin) return null;
+  const normalised = origin.replace(/\/+$/, '');
+  if (ALLOWED_ORIGINS.includes(normalised)) return origin;
+  if (!normalised.startsWith('https://')) return null;
+  if (ALLOWED_ORIGIN_SUFFIXES.some((suffix) => normalised.endsWith(suffix))) return origin;
+  return null;
+}
+
+/**
+ * Every header the browser asks permission for during the preflight.
+ *
+ * supabase-js sends `apikey` on every request, adds `x-client-info`, and this app
+ * also sets `x-application-name` globally. Omitting any one of them makes the
+ * preflight fail with "does not have HTTP ok status" even when the origin is
+ * allowed, so the list here has to be a superset of what the client sends.
+ */
+const ALLOWED_REQUEST_HEADERS =
+  'authorization, content-type, apikey, x-client-info, x-client-version, x-application-name, x-supabase-api-version';
 
 function corsHeaders(request: Request): Record<string, string> {
-  const requestOrigin = request.headers.get('origin');
-  const allowed =
-    requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin.replace(/\/+$/, ''))
-      ? requestOrigin
-      : null;
-
+  const allowed = originAllowed(request.headers.get('origin'));
   if (!allowed) return {};
   return {
     'access-control-allow-origin': allowed,
-    'access-control-allow-headers': 'authorization, content-type',
+    'access-control-allow-headers': ALLOWED_REQUEST_HEADERS,
     'access-control-allow-methods': 'POST, OPTIONS',
     'access-control-max-age': '86400',
     vary: 'Origin',
   };
+}
+
+if (RAW_ALLOWED_ORIGINS.length === 0) {
+  console.warn(
+    'manage-staff: ALLOWED_REDIRECT_ORIGINS is not set, so every browser origin is ' +
+      'refused and CORS preflights come back without headers. Fix with: ' +
+      'supabase secrets set ALLOWED_REDIRECT_ORIGINS=https://kaalvastr.in,https://*.vercel.app',
+  );
 }
 
 const json = (body: unknown, status = 200, request?: Request) =>
@@ -102,7 +139,10 @@ function safeRedirect(
   }
   const own = new URL(supabaseUrl);
   if (parsed.origin === own.origin) return parsed.toString();
-  if (ALLOWED_EXTRA_ORIGINS.includes(parsed.origin)) return parsed.toString();
+  // Reuse the CORS matcher so a deploy that is allowed to *call* this function is
+  // also allowed to receive links, including host-scoped wildcards like
+  // `https://*.vercel.app`.
+  if (originAllowed(parsed.origin)) return parsed.toString();
   throw new Error('redirectTo points at an unrecognised host');
 }
 
@@ -135,6 +175,15 @@ Deno.serve(async (request) => {
 
   if (request.method !== 'POST') {
     return fail('Use POST.', 405, request);
+  }
+
+  // A refused origin gets a logged reason instead of an opaque browser CORS
+  // failure, which otherwise hides the real cause: a missing or stale
+  // ALLOWED_REDIRECT_ORIGINS entry.
+  const requestOrigin = request.headers.get('origin');
+  if (requestOrigin && !originAllowed(requestOrigin)) {
+    console.warn(`manage-staff: refused origin ${requestOrigin}`);
+    return fail('This origin is not allowed to call this function.', 403);
   }
 
   const SUPABASE_URL = Deno.env.get('SUPABASE_URL') ?? '';
