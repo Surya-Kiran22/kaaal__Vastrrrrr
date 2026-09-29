@@ -42,7 +42,9 @@ export function SiteFooter() {
                   'Minimalist dark-grey and silver clothing, designed in Mumbai.')}
             </p>
             {business?.tagline ? (
-              <p className="mt-4 text-2xs uppercase tracking-widest2 text-kv-dim">{business.tagline}</p>
+              <p className="mt-4 font-editorial text-lg uppercase leading-tight tracking-tight text-kv-white">
+              {business.tagline}
+            </p>
             ) : null}
 
             {business?.whatsapp_number ? (

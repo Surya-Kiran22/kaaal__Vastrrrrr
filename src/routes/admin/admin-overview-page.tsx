@@ -14,7 +14,8 @@ import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
 import { ErrorState, ProductGridSkeleton, Skeleton, toErrorMessage } from '@/components/ui/states';
 import { useAdminProducts } from '@/hooks/useProducts';
-import { formatPrice, formatRelativeDate } from '@/lib/format';
+import { formatRelativeDate } from '@/lib/format';
+import { Money } from '@/lib/privacy';
 import { cn } from '@/lib/utils';
 
 export function AdminOverviewPage() {
@@ -95,7 +96,7 @@ export function AdminOverviewPage() {
   const cards = [
     { label: 'Live products', value: stats.live.length, icon: Package, tone: 'text-kv-white' },
     { label: 'Units in stock', value: stats.units, icon: Boxes, tone: 'text-kv-white' },
-    { label: 'Stock value', value: formatPrice(stats.value), icon: CircleDollarSign, tone: 'text-kv-white' },
+    { label: 'Stock value', value: stats.value, icon: CircleDollarSign, tone: 'text-kv-white', money: true },
     { label: 'Archived', value: stats.archived.length, icon: Archive, tone: 'text-kv-muted' },
   ] as const;
 
@@ -131,7 +132,9 @@ export function AdminOverviewPage() {
                   <p className="text-2xs uppercase tracking-widest text-kv-dim">{card.label}</p>
                   <card.icon className="h-4 w-4 text-kv-dim" aria-hidden />
                 </div>
-                <p className={`mt-3 font-display text-3xl tabular-nums ${card.tone}`}>{card.value}</p>
+                <p className={`mt-3 font-display text-3xl tabular-nums ${card.tone}`}>
+                  {'money' in card ? <Money value={card.value} /> : card.value}
+                </p>
               </div>
             ))}
           </div>
@@ -284,7 +287,9 @@ export function AdminOverviewPage() {
                     </p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-sm tabular-nums text-kv-silver">{formatPrice(product.price)}</p>
+                    <p className="text-sm tabular-nums text-kv-silver">
+        <Money value={product.price} />
+      </p>
                     <p className="text-2xs text-kv-dim">{formatRelativeDate(product.updated_at)}</p>
                   </div>
                 </Link>

@@ -14,6 +14,7 @@ import { AdminAccountsPage } from './routes/admin/admin-accounts-page';
 import { AdminLayout } from './routes/admin/admin-layout';
 import { AdminLoginPage, type AdminLoginSearch } from './routes/admin/admin-login-page';
 import { AdminOverviewPage } from './routes/admin/admin-overview-page';
+import { AdminInventoryPage } from './routes/admin/admin-inventory-page';
 import {
   AdminProductEditPage,
   AdminProductNewPage,
@@ -22,6 +23,7 @@ import { AdminProductsPage } from './routes/admin/admin-products-page';
 import { AdminSettingsPage } from './routes/admin/admin-settings-page';
 import { ContactPage } from './routes/contact-page';
 import { HomePage } from './routes/home-page';
+import { InvoiceTokenPage } from './routes/invoice-token-page';
 import { ProductDetailPage } from './routes/product-detail-page';
 import { ShopPage, type ShopSearch } from './routes/shop-page';
 import { StaffLayout } from './routes/staff/staff-layout';
@@ -67,6 +69,13 @@ const contactRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/contact',
   component: ContactPage,
+});
+
+/* Public shareable invoice. No guard: the token in RPC lookup is the auth. */
+const invoiceRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/invoice/$token',
+  component: InvoiceTokenPage,
 });
 
 /* -------------------------------------------------------------------------- */
@@ -275,6 +284,12 @@ const adminAccountsRoute = createRoute({
   component: AdminAccountsPage,
 });
 
+const adminInventoryRoute = createRoute({
+  getParentRoute: () => adminRoute,
+  path: '/inventory',
+  component: AdminInventoryPage,
+});
+
 const adminSettingsRoute = createRoute({
   getParentRoute: () => adminRoute,
   path: '/settings',
@@ -286,6 +301,7 @@ const routeTree = rootRoute.addChildren([
   shopRoute,
   productRoute,
   contactRoute,
+  invoiceRoute,
   accountLoginRoute,
   accountRegisterRoute,
   accountVerifyRoute,
@@ -299,6 +315,7 @@ const routeTree = rootRoute.addChildren([
     adminProductNewRoute,
     adminProductEditRoute,
     adminAccountsRoute,
+    adminInventoryRoute,
     adminSettingsRoute,
   ]),
 ]);

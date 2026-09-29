@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { AlertTriangle, Check, MessageCircle, Package, Phone, Truck, X } from 'lucide-react';
+import { AlertTriangle, Check, MessageCircle, Package, Phone, Receipt, Truck, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { useSetOrderStatus, useStaffOrders } from '@/hooks/useAccount';
 import { useAuth } from '@/hooks/useAuth';
 import { useBusinessSettings } from '@/hooks/useProducts';
 import { formatDateTime, formatPrice } from '@/lib/format';
+import { invoiceUrlFor, issueInvoiceToken } from '@/lib/invoices';
 import { buildWhatsappChatLink, copyToClipboard, formatDeliveryAddress } from '@/lib/whatsapp';
 import { cn } from '@/lib/utils';
 import type { Order, OrderStatus } from '@/types';
@@ -79,6 +80,19 @@ export function StaffOrdersPage() {
     toast[copied.ok ? 'success' : 'error'](
       copied.ok ? 'Message copied' : 'Configure the store WhatsApp number to message customers.',
     );
+  };
+
+  // Mints (or reuses) the share token for this order and copies the public
+  // invoice link. The link is the customer-facing copy: opening it in a new
+  // tab would move the operator away from the dispatch log, so it only copies.
+  const handleInvoice = async (order: Order) => {
+    try {
+      const token = await issueInvoiceToken(order.id);
+      await copyToClipboard(invoiceUrlFor(token));
+      toast.success('Invoice link copied');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not create that invoice link.');
+    }
   };
 
   return (
@@ -195,15 +209,20 @@ export function StaffOrdersPage() {
                       <Phone className="h-3 w-3 text-kv-dim" aria-hidden />
                       {order.customer_phone}
                     </p>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="mt-2"
-                      onClick={() => void messageCustomer(order)}
-                    >
-                      <MessageCircle className="h-3.5 w-3.5" />
-                      Message
-                    </Button>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => void messageCustomer(order)}
+                      >
+                        <MessageCircle className="h-3.5 w-3.5" />
+                        Message
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => void handleInvoice(order)}>
+                        <Receipt className="h-3.5 w-3.5" />
+                        Invoice
+                      </Button>
+                    </div>
                   </div>
 
                   <div>

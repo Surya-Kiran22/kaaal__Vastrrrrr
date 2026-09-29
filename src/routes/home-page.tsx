@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, MessageCircle, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { ProductCard } from '@/components/product/product-card';
 import { ProductSlideshow } from '@/components/product/product-slideshow';
+import { Marquee } from '@/components/marketing/marquee';
 import { Button } from '@/components/ui/button';
 import { ProductGridSkeleton } from '@/components/ui/states';
 import { Reveal } from '@/components/ui/reveal';
@@ -64,7 +65,7 @@ export function HomePage() {
             src={heroImage}
             alt=""
             aria-hidden
-            className="h-full w-full object-cover opacity-[0.22]"
+            className="slow-zoom h-full w-full object-cover opacity-[0.22]"
             fetchPriority="high"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-kv-bg/70 via-kv-bg/85 to-kv-bg" />
@@ -89,7 +90,7 @@ export function HomePage() {
               className="heading-display mt-6 text-balance"
             >
               Clothing for people who prefer{' '}
-              <span className="text-kv-silver">less, but better.</span>
+              <span className="text-outline">less, but better.</span>
             </motion.h1>
 
             <motion.p
@@ -147,6 +148,8 @@ export function HomePage() {
           </div>
         </div>
       </section>
+
+      <Marquee />
 
       {/* ------------------------------------------------------------------ */}
       {/* Categories                                                         */}

@@ -1,6 +1,7 @@
 import { Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { ExternalLink, LogOut } from 'lucide-react';
 import { ErrorBoundary } from '@/components/ui/error-boundary';
+import { PrivacyToggle } from '@/components/console/privacy-toggle';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -9,7 +10,7 @@ export function StaffLayout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   return (
-    <div className="container-kv py-12 lg:py-16">
+    <div data-console className="container-kv py-12 lg:py-16">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b border-kv-line pb-6">
         <div>
           <p className="eyebrow">Dispatch console</p>
@@ -23,6 +24,7 @@ export function StaffLayout() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <PrivacyToggle />
           <Button variant="ghost" size="sm" asChild>
             <Link to="/shop">
               <ExternalLink className="h-4 w-4" />

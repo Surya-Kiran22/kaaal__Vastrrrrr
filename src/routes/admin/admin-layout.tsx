@@ -1,6 +1,7 @@
 import { Link, Outlet, useNavigate } from '@tanstack/react-router';
 import {
   ArrowLeft,
+  ClipboardList,
   LayoutDashboard,
   LogOut,
   Package,
@@ -8,6 +9,7 @@ import {
   Users,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { PrivacyToggle } from '@/components/console/privacy-toggle';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -15,6 +17,7 @@ import { cn } from '@/lib/utils';
 const ADMIN_NAV = [
   { to: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
   { to: '/admin/products', label: 'Products', icon: Package, exact: false },
+  { to: '/admin/inventory', label: 'Inventory', icon: ClipboardList, exact: false },
   { to: '/admin/accounts', label: 'Staff & accounts', icon: Users, exact: false },
   { to: '/admin/settings', label: 'Business settings', icon: Settings2, exact: false },
 ] as const;
@@ -29,7 +32,7 @@ export function AdminLayout() {
   };
 
   return (
-    <div className="min-h-[calc(100dvh-6rem)]">
+    <div data-console className="min-h-[calc(100dvh-6rem)]">
       {/* Admin top bar ------------------------------------------------- */}
       <div className="border-b border-kv-line bg-kv-surface/50">
         <div className="container-kv flex flex-wrap items-center justify-between gap-4 py-4">
@@ -49,10 +52,13 @@ export function AdminLayout() {
               </p>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            <LogOut className="h-3.5 w-3.5" />
-            Sign out
-          </Button>
+          <div className="flex items-center gap-2">
+            <PrivacyToggle />
+            <Button variant="outline" size="sm" onClick={handleSignOut}>
+              <LogOut className="h-3.5 w-3.5" />
+              Sign out
+            </Button>
+          </div>
         </div>
       </div>
 

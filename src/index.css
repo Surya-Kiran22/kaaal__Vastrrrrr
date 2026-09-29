@@ -5,31 +5,86 @@
 @layer base {
   :root {
     color-scheme: dark;
-    --kv-bg: 11 11 13;
-    --kv-surface: 19 19 22;
-    --kv-raised: 26 26 30;
-    --kv-line: 38 38 43;
+    --kv-rgb-bg: 1 1 1;
+    --kv-rgb-surface: 4 4 4;
+    --kv-rgb-card: 5 5 5;
+    --kv-rgb-raised: 10 10 10;
+    --kv-rgb-hover: 16 16 16;
+    --kv-rgb-line: 19 19 19;
+    --kv-rgb-line-strong: 46 46 46;
+    --kv-rgb-muted: 113 113 113;
+    --kv-rgb-dim: 77 77 77;
+    --kv-rgb-silver: 194 194 194;
+    --kv-rgb-light: 226 226 226;
+    --kv-rgb-white: 242 242 242;
+    --kv-rgb-crimson: 139 43 32;
+    --kv-rgb-gunmetal: 58 58 60;
+    --kv-rgb-success: 63 178 127;
+    --kv-rgb-warning: 217 164 65;
+    --kv-rgb-danger: 229 72 77;
+  }
+
+  /* Enterprise POS scope: flat charcoal + soft silver.
+     Redefining these variables re-tints every kv-* utility inside the admin
+     and staff consoles, including the opacity-modified variants, so the
+     components themselves need no changes. */
+  [data-console] {
+    --kv-rgb-bg: 18 18 18;
+    --kv-rgb-surface: 26 26 26;
+    --kv-rgb-card: 28 28 28;
+    --kv-rgb-raised: 38 38 38;
+    --kv-rgb-hover: 38 38 38;
+    --kv-rgb-line: 42 42 42;
+    --kv-rgb-line-strong: 58 58 58;
+    --kv-rgb-muted: 160 160 160;
+    --kv-rgb-dim: 112 112 112;
+    --kv-rgb-silver: 192 192 192;
+    --kv-rgb-light: 229 229 229;
+    --kv-rgb-white: 245 245 245;
+    --kv-rgb-crimson: 192 192 192;
+    --kv-rgb-gunmetal: 79 79 79;
+    --kv-rgb-success: 52 211 153;
+    --kv-rgb-warning: 217 164 65;
+    --kv-rgb-danger: 220 38 38;
   }
 
   * {
     @apply border-kv-line;
   }
 
+  /* Display headings use the condensed display face across the storefront. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display tracking-[-0.02em] leading-[0.9];
+  }
+
+  /* The enterprise console keeps Inter for headings instead. */
+  [data-console] h1,
+  [data-console] h2,
+  [data-console] h3,
+  [data-console] h4 {
+    @apply font-sans font-semibold tracking-[-0.015em] leading-tight;
+  }
+
   html {
     -webkit-text-size-adjust: 100%;
-    scroll-behavior: smooth;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    html {
-      scroll-behavior: auto;
-    }
     *,
     *::before,
     *::after {
       animation-duration: 0.001ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.001ms !important;
+    }
+    /* Looping transforms would otherwise stop mid-cycle and leave the
+       element permanently scaled or translated. */
+    .slow-zoom,
+    .marquee-track {
+      animation: none !important;
     }
   }
 
@@ -76,9 +131,9 @@
   input:-webkit-autofill,
   input:-webkit-autofill:hover,
   input:-webkit-autofill:focus {
-    -webkit-text-fill-color: #e8e8ec;
-    -webkit-box-shadow: 0 0 0 1000px #131316 inset;
-    caret-color: #e8e8ec;
+    -webkit-text-fill-color: #e2e2e2;
+    -webkit-box-shadow: 0 0 0 1000px #050505 inset;
+    caret-color: #e2e2e2;
   }
 }
 
@@ -91,15 +146,25 @@
   .eyebrow {
     @apply text-2xs font-semibold uppercase tracking-widest2 text-kv-muted;
   }
+  /* Crimson hairline tick - the one place the accent colour appears. */
+  .eyebrow::before {
+    content: '';
+    display: inline-block;
+    width: 1.5rem;
+    height: 1px;
+    margin-right: 0.75rem;
+    vertical-align: middle;
+    background-color: #8b2b20;
+  }
 
   .heading-display {
-    @apply font-display text-4xl font-normal leading-[1.05] tracking-tight text-kv-white sm:text-5xl lg:text-6xl;
+    @apply font-display text-5xl font-normal leading-[0.9] tracking-[-0.02em] text-kv-white sm:text-6xl lg:text-7xl;
   }
 
   /* Hairline divider with a silver fade at the edges. */
   .rule-silver {
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgb(201 201 209 / 0.35), transparent);
+    background: linear-gradient(90deg, transparent, rgb(194 194 194 / 0.35), transparent);
   }
 
   /* Subtle top-light used on dark cards to suggest a surface edge. */
@@ -142,5 +207,122 @@
   /* Visible only to screen readers. */
   .sr-only-focusable:not(:focus):not(:focus-within) {
     @apply sr-only;
+  }
+}
+
+/* ---- Reference motion utilities -------------------------------
+   Deliberately outside @layer: Tailwind purges unused @layer rules, and
+   these are hand-authored animation primitives rather than scanned
+   utilities. The @keyframes are declared explicitly because Tailwind only
+   emits keyframes for animation utilities it finds in markup. */
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slow-zoom {
+  from {
+    transform: scale(1.05);
+  }
+  to {
+    transform: scale(1.18);
+  }
+}
+
+.marquee-track {
+  animation: marquee 40s linear infinite;
+}
+
+.slow-zoom {
+  animation: slow-zoom 18s ease-out infinite alternate;
+}
+
+/* Film-grain overlay. Paints over the whole viewport without intercepting
+   pointer events, so it is safe on top of the cart and dialogs. */
+.grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.9'/></svg>");
+}
+
+/* Hollow type for oversized editorial numerals. */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px #f2f2f2;
+}
+
+/* Numbers: tabular so money columns stay aligned across rows. */
+.font-money {
+  font-variant-numeric: tabular-nums lining-nums;
+  font-feature-settings: 'tnum', 'cv11';
+  letter-spacing: -0.01em;
+}
+
+/* ---- Enterprise console scope ---------------------------------
+   The POS uses softer corners than the storefront's sharp editorial scale,
+   and no drop shadows at all - cards are separated by a 1px border only. */
+[data-console] .rounded-md {
+  border-radius: 8px;
+}
+[data-console] .rounded-lg {
+  border-radius: 10px;
+}
+[data-console] .rounded-xl {
+  border-radius: 14px;
+}
+[data-console] .rounded-2xl {
+  border-radius: 18px;
+}
+[data-console] .shadow-glow,
+[data-console] .shadow-lift,
+[data-console] .shadow-oversized {
+  box-shadow: none;
+}
+
+/* ---- Print -------------------------------------------------------
+   The shareable invoice renders as a legible document on paper: white
+   background, dark ink, and without the storefront chrome around it.
+   Scoped via :has() so printing any other storefront page is untouched. */
+@media print {
+  body.grain::after {
+    display: none !important;
+  }
+  body:has(.invoice-page) {
+    background: #fff !important;
+  }
+  body:has(.invoice-page) .no-print {
+    display: none !important;
+  }
+  body:has(.invoice-page) header,
+  body:has(.invoice-page) footer {
+    display: none !important;
+  }
+  body:has(.invoice-page) .invoice-sheet {
+    background: #fff !important;
+    border-color: #d0d0d0 !important;
+    box-shadow: none !important;
+  }
+  body:has(.invoice-page) .invoice-sheet * {
+    color: #111 !important;
+  }
+  body:has(.invoice-page) .invoice-sheet .border-kv-line,
+  body:has(.invoice-page) .invoice-sheet .border-kv-line\/60 {
+    border-color: #e2e2e2 !important;
   }
 }
