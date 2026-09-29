@@ -482,6 +482,12 @@ environment; that would leak it to every visitor. `.vercelignore` keeps a local
 
 `.nvmrc` pins Node 22 so the Vercel build matches local and Render.
 
+`npm run build` runs `scripts/build-env-check.mjs` first and **fails** when
+either `VITE_` variable is absent. Vite inlines these at build time, so without
+the guard a host build without env vars succeeds and then serves "Supabase is
+not configured" to every visitor — a green build over a dead shop. The guard
+accepts a local `.env`, so offline builds still work.
+
 ### Custom domain
 
 `index.html` declares `https://kaalvastr.in/` as the canonical URL, so attach
