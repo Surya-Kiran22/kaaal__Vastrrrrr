@@ -82,9 +82,10 @@ export function AdminAccountsPage() {
 
   return (
     <div className="space-y-10">
-      <div>
-        <h1 className="font-display text-2xl tracking-tight text-kv-white">Staff &amp; admin accounts</h1>
-        <p className="mt-2 text-sm text-kv-muted">
+    <div>
+      <p className="text-xs uppercase tracking-[0.4em] text-kv-muted">Team</p>
+      <h1 className="mt-2 text-4xl">Staff &amp; admin accounts</h1>
+      <p className="mt-1 text-sm text-kv-muted">
           Every account that can reach the dispatch console or this dashboard. Passwords are never displayed or
           stored in readable form.
         </p>

@@ -331,9 +331,9 @@ export function AdminProductFormPage({ productId }: { productId?: string }) {
             <ArrowLeft className="h-3 w-3" aria-hidden />
             All products
           </Link>
-          <h1 className="mt-4 font-display text-3xl tracking-tight text-kv-white">
-            {isEdit ? 'Edit product' : 'Add product'}
-          </h1>
+      <h1 className="mt-2 text-4xl">
+        {isEdit ? 'Edit product' : 'Add product'}
+      </h1>
           {isEdit && existing ? (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Badge tone="neutral">SKU {existing.sku}</Badge>

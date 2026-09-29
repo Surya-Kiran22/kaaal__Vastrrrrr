@@ -103,9 +103,11 @@ export function AdminOverviewPage() {
   return (
     <div className="space-y-9">
       <header>
-        <p className="eyebrow">Overview</p>
-        <h1 className="mt-3 font-display text-3xl tracking-tight text-kv-white">Catalogue health</h1>
-        <p className="mt-3 max-w-xl text-sm leading-relaxed text-kv-muted">
+        <p className="text-xs uppercase tracking-[0.4em] text-kv-muted">Overview</p>
+        <h1 className="mt-2 text-4xl">
+          Catalogue <span className="gold-text">health</span>
+        </h1>
+        <p className="mt-1 text-sm text-kv-muted">
           Everything you change here appears on the customer storefront immediately. Archived products keep
           their records but are hidden from shoppers.
         </p>
@@ -125,16 +127,27 @@ export function AdminOverviewPage() {
         />
       ) : (
         <>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4">
             {cards.map((card) => (
-              <div key={card.label} className="edge-light rounded-xl border border-kv-line bg-kv-card p-5">
-                <div className="flex items-center justify-between">
-                  <p className="text-2xs uppercase tracking-widest text-kv-dim">{card.label}</p>
-                  <card.icon className="h-4 w-4 text-kv-dim" aria-hidden />
+              <div
+                key={card.label}
+                className="rounded-xl border border-kv-line bg-kv-card p-4 transition-colors hover:border-[#4a4a4a]"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="min-w-0">
+                    <p className="text-[11px] font-medium uppercase tracking-wider text-kv-muted">
+                      {card.label}
+                    </p>
+                    <p
+                      className={`mt-2 font-money text-2xl font-semibold tracking-tight ${card.tone}`}
+                    >
+                      {'money' in card ? <Money value={card.value} /> : card.value}
+                    </p>
+                  </div>
+                  <div className="rounded-md border border-kv-line bg-kv-raised/40 p-1.5 text-kv-muted">
+                    <card.icon className="h-3.5 w-3.5" aria-hidden />
+                  </div>
                 </div>
-                <p className={`mt-3 font-display text-3xl tabular-nums ${card.tone}`}>
-                  {'money' in card ? <Money value={card.value} /> : card.value}
-                </p>
               </div>
             ))}
           </div>

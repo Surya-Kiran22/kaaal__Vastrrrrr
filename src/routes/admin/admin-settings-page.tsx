@@ -163,8 +163,8 @@ export function AdminSettingsPage() {
     return (
       <div className="space-y-7">
         <header>
-          <p className="eyebrow">Configuration</p>
-          <h1 className="mt-3 font-display text-3xl tracking-tight text-kv-white">Business settings</h1>
+    <p className="text-xs uppercase tracking-[0.4em] text-kv-muted">Configuration</p>
+    <h1 className="mt-2 text-4xl">Business settings</h1>
         </header>
         <ErrorState
           title="Could not load settings"

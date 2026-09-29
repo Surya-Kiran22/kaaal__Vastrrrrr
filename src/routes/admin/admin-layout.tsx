@@ -34,7 +34,7 @@ export function AdminLayout() {
   return (
     <div data-console className="min-h-[calc(100dvh-6rem)]">
       {/* Admin top bar ------------------------------------------------- */}
-      <div className="border-b border-kv-line bg-kv-surface/50">
+      <div className="border-b border-kv-line bg-[#0f0f0f]">
         <div className="container-kv flex flex-wrap items-center justify-between gap-4 py-4">
           <div className="flex items-center gap-4">
             <Link

@@ -275,8 +275,18 @@
 }
 
 /* ---- Enterprise console scope ---------------------------------
-   The POS uses softer corners than the storefront's sharp editorial scale,
-   and no drop shadows at all - cards are separated by a 1px border only. */
+   Ported from the reference dashboard's styles.css. The POS uses softer
+   corners than the storefront's sharp editorial scale, and no drop shadows at
+   all - cards are separated by a 1px border only.
+
+   Radius scale is the reference's: --radius 10px, then sm -4, md -2, lg 0,
+   xl +4, 2xl +8, 3xl +12, 4xl +16. */
+[data-console] .rounded-sm {
+  border-radius: 6px;
+}
+[data-console] .rounded {
+  border-radius: 10px;
+}
 [data-console] .rounded-md {
   border-radius: 8px;
 }
@@ -289,10 +299,68 @@
 [data-console] .rounded-2xl {
   border-radius: 18px;
 }
+[data-console] .rounded-3xl {
+  border-radius: 22px;
+}
+[data-console] .rounded-4xl {
+  border-radius: 26px;
+}
 [data-console] .shadow-glow,
 [data-console] .shadow-lift,
 [data-console] .shadow-oversized {
   box-shadow: none;
+}
+
+/* The reference renders headings at weight 600 with a hair of negative
+   tracking and leans on Inter's cv11/ss01 alternates. */
+[data-console] body,
+[data-console] {
+  font-feature-settings: 'cv11', 'ss01';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-console] .font-money {
+  font-weight: 500;
+  font-feature-settings: 'tnum', 'cv11';
+  letter-spacing: -0.01em;
+}
+
+/* Flat enterprise card. The reference keeps the historical `glass` name so its
+   existing markup renders as matte charcoal; `console-card` is the clearer
+   alias for new markup. Both are the same thing: no glow, no backdrop blur. */
+[data-console] .glass,
+[data-console] .console-card {
+  background: rgb(var(--kv-rgb-card));
+  border: 1px solid rgb(var(--kv-rgb-line));
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+/* The reference keeps the historical `gold-text` name; in this palette it
+   renders as a soft silver highlight, used for the emphasised half of a
+   console page heading. */
+[data-console] .gold-text {
+  color: rgb(var(--kv-rgb-light));
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-console] .gold-border {
+  border: 1px solid #3a3a3a;
+  background: rgb(var(--kv-rgb-card));
+}
+
+[data-console] .gold-glow {
+  box-shadow: none;
+}
+
+/* Compact table zebra + hover, so long console tables read as one system. */
+[data-console] table tbody tr:nth-child(odd) {
+  background: rgb(255 255 255 / 0.015);
+}
+[data-console] table tbody tr:hover {
+  background: rgb(255 255 255 / 0.035);
 }
 
 /* ---- Print -------------------------------------------------------

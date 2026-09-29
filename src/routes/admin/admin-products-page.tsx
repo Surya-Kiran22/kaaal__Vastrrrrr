@@ -76,9 +76,9 @@ export function AdminProductsPage() {
     <div className="space-y-7">
       <header className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="eyebrow">Catalogue</p>
-          <h1 className="mt-3 font-display text-3xl tracking-tight text-kv-white">Products</h1>
-          <p className="mt-2.5 text-sm text-kv-muted">
+        <p className="text-xs uppercase tracking-[0.4em] text-kv-muted">Catalogue</p>
+        <h1 className="mt-2 text-4xl">Products</h1>
+        <p className="mt-1 text-sm text-kv-muted">
             {isError
               ? 'Catalogue unavailable'
               : `${products.length} product${products.length === 1 ? '' : 's'} · ${
