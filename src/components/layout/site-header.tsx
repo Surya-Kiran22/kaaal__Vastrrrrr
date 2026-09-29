@@ -40,7 +40,15 @@ export function SiteHeader() {
   }, [pathname]);
 
   const whatsapp = buildWhatsappChatLink(business?.whatsapp_number);
-  const initial = profile?.full_name?.trim()?.charAt(0).toUpperCase();
+  const avatarUrl = profile?.avatar_url ?? null;
+  // The username is the preferred label, then the display name, then the email
+  // local part. This still resolves while the profile row is mid-refresh and
+  // only the session is known, so the avatar does not flicker to a placeholder.
+  const initial =
+    profile?.username?.charAt(0).toUpperCase() ||
+    profile?.full_name?.trim()?.charAt(0).toUpperCase() ||
+    profile?.email?.charAt(0).toUpperCase() ||
+    '';
   const consoleTo = isAdmin ? '/admin' : '/staff';
 
   return (
@@ -146,10 +154,22 @@ export function SiteHeader() {
             </Button>
           ) : null}
 
-          {isAuthenticated && canShop ? (
+          {/*
+            Gated on authentication, not `canShop`. An authenticated customer
+            who has not confirmed their email must still see their own profile
+            here; hiding it behind `canShop` was why a signed-in unverified
+            customer was shown the Sign in button instead.
+          */}
+          {isAuthenticated ? (
             <Button variant="ghost" size="icon" asChild>
               <Link to="/account" aria-label="My account">
-                {initial ? (
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt=""
+                    className="h-6 w-6 rounded-full border border-kv-line object-cover"
+                  />
+                ) : initial ? (
                   <span className="flex h-6 w-6 items-center justify-center rounded-full border border-kv-line text-2xs font-semibold text-kv-silver">
                     {initial}
                   </span>
@@ -204,7 +224,7 @@ export function SiteHeader() {
                     Chat on WhatsApp
                   </a>
                 ) : null}
-                {canShop ? (
+                {isAuthenticated ? (
                   <Link
                     to="/account"
                     onClick={() => setMenuOpen(false)}

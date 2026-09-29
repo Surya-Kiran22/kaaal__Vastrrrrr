@@ -70,6 +70,13 @@ export interface Profile {
   id: string;
   email: string;
   full_name: string;
+  /**
+   * Generated once from the full name at signup, unique across the table, and
+   * not self-writable. Safe to render in a URL and safe to compare directly.
+   */
+  username: string;
+  /** Public URL in the `profile-avatars` bucket; null until the customer uploads. */
+  avatar_url: string | null;
   phone: string | null;
   role: ProfileRole;
   status: AccountStatus;

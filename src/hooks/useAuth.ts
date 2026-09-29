@@ -29,6 +29,12 @@ export interface UseAuthResult extends AuthState {
   signInForConsole: (email: string, password: string) => Promise<Profile>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<Profile | null>;
+  /** Saves the display name. Contact details are intentionally not editable. */
+  updateOwnProfile: (input: { fullName: string }) => Promise<Profile | null>;
+  /** Saves the public URL of an uploaded avatar, or null to clear it. */
+  updateOwnAvatar: (avatarUrl: string | null) => Promise<Profile | null>;
+  /** Uploads a picture to `profile-avatars` and points the profile at it. */
+  uploadOwnAvatar: (file: File) => Promise<Profile | null>;
   /** Bearer token for privileged Edge Function calls. */
   getAccessToken: () => Promise<string | null>;
 }
@@ -48,6 +54,15 @@ export function useAuth(): UseAuthResult {
 
   const signOut = useCallback(() => authController.signOut(), []);
   const refreshProfile = useCallback(() => authController.refreshProfile(), []);
+  const updateOwnProfile = useCallback(
+    (input: { fullName: string }) => authController.updateOwnProfile(input),
+    [],
+  );
+  const updateOwnAvatar = useCallback(
+    (avatarUrl: string | null) => authController.updateOwnAvatar(avatarUrl),
+    [],
+  );
+  const uploadOwnAvatar = useCallback((file: File) => authController.uploadOwnAvatar(file), []);
   const getAccessToken = useCallback(() => authController.getAccessToken(), []);
 
   const profile = state.profile;
@@ -67,6 +82,9 @@ export function useAuth(): UseAuthResult {
     signInForConsole,
     signOut,
     refreshProfile,
+    updateOwnProfile,
+    updateOwnAvatar,
+    uploadOwnAvatar,
     getAccessToken,
   };
 }

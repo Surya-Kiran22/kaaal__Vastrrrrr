@@ -21,10 +21,9 @@ const schema = z
     phone: z
       .string()
       .trim()
-      .max(15, 'Phone number looks too long.')
-      .regex(/^[+]?[\d\s-]{10,15}$/, 'Use digits, spaces, + or - only.')
-      .optional()
-      .or(z.literal('')),
+      .min(1, 'Enter your mobile number.')
+      .max(20, 'Phone number looks too long.')
+      .regex(/^[+]?[\d\s-]{10,20}$/, 'Use digits, spaces, + or - only.'),
     email: z.string().trim().min(1, 'Enter your email address.').email('Enter a valid email address.'),
     password: z
       .string()
@@ -70,7 +69,9 @@ export function AccountRegisterPage() {
         email: values.email,
         password: values.password,
         fullName: values.fullName,
-        phone: values.phone ?? '',
+        // Digits only, matching what migration 019's trigger stores, so the
+        // client and the database agree on the value the unique index sees.
+        phone: values.phone.replace(/\D/g, ''),
       });
 
       if (result.needsVerification) {
@@ -186,7 +187,8 @@ export function AccountRegisterPage() {
             <Field
               label="Mobile number"
               htmlFor="reg-phone"
-              hint="Optional, for order updates"
+              required
+              hint="Required, and locked after signup"
               error={errors.phone?.message}
             >
               <div className="relative">
