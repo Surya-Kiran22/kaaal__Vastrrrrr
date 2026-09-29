@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, MessageCircle, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { ProductCard } from '@/components/product/product-card';
+import { ProductSlideshow } from '@/components/product/product-slideshow';
 import { Button } from '@/components/ui/button';
 import { ProductGridSkeleton } from '@/components/ui/states';
 import { Reveal } from '@/components/ui/reveal';
@@ -40,6 +41,14 @@ export function HomePage() {
   // Fall back to the newest arrivals if nothing is flagged as featured.
   const showcase = (featured.length > 0 ? featured : newest).slice(0, 8);
   const showcasePending = featured.length > 0 ? featuredPending : newestPending;
+
+  /*
+   * The slideshow is built from the same pool but filtered on `inStock`, which
+   * `toStoreProduct` computes from variant stock rather than the raw `stock`
+   * column. Filtering on the column would advertise size-and-colour
+   * combinations that are individually sold out.
+   */
+  const inStockShowcase = showcase.filter((product) => product.inStock).slice(0, 8);
 
   const heroImage =
     business?.hero_image_url ??
@@ -164,6 +173,13 @@ export function HomePage() {
             </div>
           </div>
         </section>
+      ) : null}
+
+      {/* ------------------------------------------------------------------ */}
+      {/* In-stock slideshow                                                  */}
+      {/* ------------------------------------------------------------------ */}
+      {!showcasePending && inStockShowcase.length > 0 ? (
+        <ProductSlideshow products={inStockShowcase} />
       ) : null}
 
       {/* ------------------------------------------------------------------ */}
