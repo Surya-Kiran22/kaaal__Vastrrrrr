@@ -1,0 +1,22 @@
+# Never upload real credentials. Vercel injects these as project env vars
+# (Settings -> Environment Variables), and they are already gitignored, but
+# this keeps a local .env out of the deployment upload as a second line of
+# defence. Only the Supabase *publishable* key belongs in a VITE_ variable,
+# because it ships to the browser. Never put a service_role or secret key in
+# the frontend environment.
+.env
+.env.*
+!.env.example
+
+# Database migrations and ops tooling are not needed to build the SPA. The
+# build is `tsc -b && vite build`, which never reads these. Keeping them out
+# trims the upload and stops generated SQL bundles reaching the CDN.
+supabase/
+scripts/build-apply-all.mjs
+scripts/build-drift-check.mjs
+scripts/verify-admin-bootstrap.mjs
+scripts/verify-customer-auth.mjs
+scripts/verify-staff-dispatch.mjs
+scripts/verify-staff-invite.mjs
+scripts/manage-staff.mjs
+scripts/create-first-admin.mjs

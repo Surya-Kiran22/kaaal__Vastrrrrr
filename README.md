@@ -444,14 +444,66 @@ supabase/
 
 ## Deployment
 
-`vercel.json` is included: static `dist` output, SPA rewrite to
-`/index.html` (required for client-side routing) and security headers. On any
-other host, reproduce the rewrite rule so deep links like
-`/product/obsidian-hoodie` resolve.
+The app is a Vite single-page app; the database, auth and file storage all live
+in Supabase. So both supported hosts deploy a static `dist` directory — there is
+no server process to run.
+
+- **Vercel** — `vercel.json` pins `framework: vite`, `npm ci`, `npm run build`
+  and `outputDirectory: dist`, rewrites every path to `/index.html`, and sets the
+  same security headers as Render.
+- **Render** — `render.yaml` is a static site blueprint with the equivalent
+  config plus a build filter so a migration-only commit does not trigger a
+  pointless frontend deploy.
+
+On any other host, reproduce the SPA rewrite to `/index.html`, otherwise deep
+links like `/product/monolith-heavyweight-tee` 404 on a hard refresh.
+
+### Vercel
+
+```bash
+npm i -g vercel
+vercel            # preview
+vercel --prod     # production
+```
+
+Or import the repo at vercel.com/new. Set both variables under
+**Project → Settings → Environment Variables** for *every* environment
+(preview and production both need them, or preview logins fail):
+
+| Variable | Value |
+| --- | --- |
+| `VITE_SUPABASE_URL` | your Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | the publishable/anon key |
+
+Only the publishable key belongs in a `VITE_` variable — it is compiled into
+the browser bundle. Never set a `service_role` or secret key in the frontend
+environment; that would leak it to every visitor. `.vercelignore` keeps a local
+`.env` and the SQL migrations out of the upload regardless.
+
+`.nvmrc` pins Node 22 so the Vercel build matches local and Render.
+
+### Custom domain
+
+`index.html` declares `https://kaalvastr.in/` as the canonical URL, so attach
+that domain on whichever host is canonical:
+
+- Vercel → **Project → Settings → Domains → Add** `kaalvastr.in`
+- Render → **Connect** → **Custom Domains**
+
+Keep the other host on its `*.vercel.app` / `*.onrender.com` URL for previews.
+Whichever domain a user is on, add it to Supabase Auth → *URL Configuration*
+(both **Site URL** and **Redirect URLs**) or password sign-in and reset links
+are rejected for that host. `npm run build` should pass `--base=/` if the site
+is ever served from a subdirectory; the catch-all rewrite and the root-absolute
+asset paths in `dist/index.html` assume the domain root.
+
+### Supabase Auth URLs
 
 Supabase Auth → *URL Configuration* must list the production URL in both
 **Site URL** and **Redirect URLs**, otherwise password sign-in and every
-password-reset link are rejected.
+password-reset link are rejected. If you keep Render live while adding Vercel,
+list both domains — a password-reset email is built from the *current* origin,
+so whichever host a user is on must be allow-listed or the link is discarded.
 
 Before going live:
 
