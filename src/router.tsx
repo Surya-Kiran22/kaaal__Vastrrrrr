@@ -25,7 +25,7 @@ import { HomePage } from './routes/home-page';
 import { ProductDetailPage } from './routes/product-detail-page';
 import { ShopPage, type ShopSearch } from './routes/shop-page';
 import { StaffLayout } from './routes/staff/staff-layout';
-import { StaffLoginPage, type StaffLoginSearch } from './routes/staff/staff-login-page';
+import { type StaffLoginSearch } from './routes/staff/staff-login-page';
 import { StaffOrdersPage } from './routes/staff/staff-orders-page';
 import { authController } from '@/lib/auth-controller';
 import { queryClient } from '@/lib/query-client';
@@ -152,6 +152,14 @@ const accountOrdersRoute = createRoute({
 /* Staff dispatch console                                                      */
 /* -------------------------------------------------------------------------- */
 
+/*
+ * There is deliberately only one console sign-in door.
+ *
+ * `/admin/login` takes both staff and admin, so a single known-good URL survives
+ * any breakage on the customer side. This route is kept only to redirect the
+ * old bookmark, and it preserves the requested destination so `/staff/login`
+ * still lands a staff member on the dispatch console.
+ */
 const staffLoginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/staff/login',
@@ -159,7 +167,13 @@ const staffLoginRoute = createRoute({
     redirect: typeof search.redirect === 'string' ? search.redirect : undefined,
     reason: search.reason === 'forbidden' ? 'forbidden' : undefined,
   }),
-  component: StaffLoginPage,
+  beforeLoad: ({ search }) => {
+    throw redirect({
+      to: '/admin/login',
+      search: { redirect: search.redirect ?? '/staff', reason: search.reason },
+    });
+  },
+  component: () => null,
 });
 
 /**

@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Field, Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
-import { authController } from '@/lib/auth-controller';
+import { AuthError, authController, isConsoleRole } from '@/lib/auth-controller';
 import { isSupabaseConfigured } from '@/lib/env';
 
 const schema = z.object({
@@ -27,7 +27,7 @@ export interface AccountLoginSearch {
 export function AccountLoginPage() {
   const search = useSearch({ from: '/account/login' });
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, signOut } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [recoveryMode, setRecoveryMode] = useState(false);
@@ -67,7 +67,23 @@ export function AccountLoginPage() {
     }
 
     try {
-      await signIn(values.email, values.password);
+      const profile = await signIn(values.email, values.password);
+
+      // Staff and admin sign in at /admin/login only. A console account that
+      // lands here is signed straight back out so it never holds a customer
+      // session, and the failure is reported with the *password* error on
+      // purpose: telling them "that is a staff account, use the other page"
+      // would turn this form into a way to confirm which addresses hold
+      // console roles. Staying vague is what makes the isolation work, and it
+      // also keeps this form from leaking role information to strangers.
+      if (isConsoleRole(profile?.role)) {
+        await signOut();
+        throw new AuthError(
+          'That email and password combination is not recognised.',
+          'invalid_credentials',
+        );
+      }
+
       void navigate({ to: safeRedirect() as never, replace: true });
     } catch (error) {
       setFormError(error instanceof Error ? error.message : 'Sign in failed.');
