@@ -115,3 +115,34 @@ export function toStoreProduct(row: Product): StoreProduct {
 export function toStoreProducts(rows: Product[] | null | undefined): StoreProduct[] {
   return Array.isArray(rows) ? rows.map(toStoreProduct) : [];
 }
+
+/**
+ * Mirrors `products_variant_stock_is_valid` so a write is rejected here with a
+ * readable message instead of a Postgres exception.
+ *
+ * The trigger raises when a key has no `|`, or when a value is negative or not a
+ * whole number. Note the companion `products_sync_total_stock` trigger treats an
+ * empty `{}` object as "not variant tracked" and then reads the flat `stock`
+ * column instead, which is why callers must not write an empty map.
+ */
+export function validateVariantStock(stock: VariantStock): string | null {
+  for (const [key, units] of Object.entries(stock)) {
+    if (!key.includes('|')) {
+      return `"${key}" needs a colour and a size, like "Black|M".`;
+    }
+    if (!Number.isInteger(units) || units < 0) {
+      return `${key} must be a whole number of units, zero or more.`;
+    }
+  }
+  return null;
+}
+
+/**
+ * True when the new total is zero, which the sync trigger turns into
+ * `is_available = false` on the storefront. The trigger never flips it back, so
+ * the admin has to re-publish the product by hand; worth saying out loud.
+ */
+export function zeroesOutAvailability(stock: VariantStock): boolean {
+  return Object.keys(stock).length > 0 && Object.values(stock).every((units) => units === 0);
+}
+

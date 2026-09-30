@@ -7,8 +7,10 @@ import {
   PackageX,
   Search,
   Box,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { ErrorState, Skeleton, toErrorMessage } from '@/components/ui/states';
+import { StockAdjustDialog } from '@/components/admin/stock-adjust-dialog';
 import { useAdminProducts } from '@/hooks/useProducts';
 import { Money } from '@/lib/privacy';
 import { cn } from '@/lib/utils';
@@ -87,6 +89,7 @@ export function InventorySection() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('all');
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [editing, setEditing] = useState<StoreProduct | null>(null);
 
   const available = useMemo(
     () => products.filter((product) => !product.is_archived && product.is_available),
@@ -273,6 +276,9 @@ export function InventorySection() {
                     <th className="px-3 py-3 text-right font-medium">Units</th>
                     <th className="px-3 py-3 text-center font-medium">Status</th>
                     <th className="px-4 py-3 text-right font-medium sm:px-5">Value</th>
+                    <th className="px-4 py-3 text-right font-medium sm:px-5">
+                      <span className="sr-only">Actions</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -326,6 +332,16 @@ export function InventorySection() {
                         <td className="px-4 py-3 text-right sm:px-5">
                           <Money value={product.price * product.totalStock} className="text-2xs" />
                         </td>
+                        <td className="px-4 py-3 text-right sm:px-5">
+                          <button
+                            type="button"
+                            onClick={() => setEditing(product)}
+                            className="inline-flex items-center gap-1.5 rounded-md border border-kv-line px-2.5 py-1.5 text-2xs uppercase tracking-widest text-kv-muted transition-colors hover:border-kv-white/40 hover:text-kv-white"
+                          >
+                            <SlidersHorizontal className="h-3 w-3" aria-hidden />
+                            Adjust
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -335,6 +351,14 @@ export function InventorySection() {
           )}
         </>
       )}
+
+      <StockAdjustDialog
+        product={editing}
+        open={editing !== null}
+        onOpenChange={(next) => {
+          if (!next) setEditing(null);
+        }}
+      />
     </div>
   );
 }

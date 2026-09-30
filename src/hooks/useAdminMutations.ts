@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { isSupabaseConfigured } from '@/lib/env';
 import { supabase } from '@/lib/supabase';
+import { validateVariantStock } from '@/lib/products';
 import { businessKeys, productKeys } from '@/hooks/useProducts';
 import type { BusinessSettings, Product, VariantStock } from '@/types';
 
@@ -108,6 +109,41 @@ export function useUpdateProduct() {
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: productKeys.all });
       toast.success('Product updated', { description: 'The storefront now shows the latest data.' });
+    },
+  });
+}
+
+export function useUpdateVariantStock() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ id, variantStock }: { id: string; variantStock: VariantStock }): Promise<Product> => {
+      assertConfigured();
+
+      const problem = validateVariantStock(variantStock);
+      if (problem) throw new Error(problem);
+
+      // `stock` and `is_available` are deliberately absent: trg_products_sync_total_stock
+      // runs before insert/update and owns both. Writing them here would either be
+      // overwritten or, in the case of is_available, undo the trigger that marks a
+      // zero-stock product unavailable.
+      const { data, error } = await supabase
+        .from('products')
+        .update({ variant_stock: variantStock })
+        .eq('id', id)
+        .select(PRODUCT_COLUMNS)
+        .single();
+
+      if (error) throw error;
+      return data as Product;
+    },
+    onSuccess: (product) => {
+      void queryClient.invalidateQueries({ queryKey: productKeys.all });
+      toast.success('Stock updated', {
+        description: `${product.name} now has ${product.stock} unit${
+          product.stock === 1 ? '' : 's'
+        } on hand.`,
+      });
     },
   });
 }
