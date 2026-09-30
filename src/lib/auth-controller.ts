@@ -78,7 +78,13 @@ export interface SignUpInput {
   email: string;
   password: string;
   fullName: string;
-  phone: string;
+  /**
+   * Optional and deliberately not collected from customers. Registration is
+   * email-only: the OTP proves the address, and `profiles.phone` is nullable with
+   * a partial index that expects gaps. Orders collect a contact number at
+   * checkout instead.
+   */
+  phone?: string;
 }
 
 export interface SignUpResult {
@@ -179,7 +185,7 @@ class AuthController {
     const { data, error } = await supabase.auth.signUp({
       email: email.trim().toLowerCase(),
       password,
-      options: { data: { full_name: fullName.trim(), phone: phone.trim() || null } },
+      options: { data: { full_name: fullName.trim(), phone: phone?.trim() || null } },
     });
 
     if (error) throw describeSignInError(error.message);

@@ -38,6 +38,7 @@ supabase/.env
 # Generated SQL bundles. The migrations in supabase/migrations/ are the source
 # of truth; these are rebuilt with `npm run db:bundle` and `npm run db:drift-check`.
 supabase/apply-all.sql
+supabase/paste-pending.sql
 supabase/tests/pre-migration-drift-check.sql
 supabase/tests/pre-migration-drift-detail.sql
 

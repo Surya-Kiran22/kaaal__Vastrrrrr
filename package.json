@@ -18,6 +18,7 @@
     "admin:bootstrap": "node --env-file=.env scripts/create-first-admin.mjs",
     "staff:manage": "node --env-file=.env scripts/manage-staff.mjs",
     "db:bundle": "node scripts/build-apply-all.mjs",
+    "db:paste": "node scripts/build-paste-pending.mjs",
     "db:drift-check": "node scripts/build-drift-check.mjs"
   },
   "dependencies": {

@@ -511,6 +511,58 @@ password-reset link are rejected. If you keep Render live while adding Vercel,
 list both domains — a password-reset email is built from the *current* origin,
 so whichever host a user is on must be allow-listed or the link is discarded.
 
+### Finishing setup without the Supabase CLI
+
+Every remaining production step is a dashboard action or a local command; none of
+them need `supabase login`. This is the whole sequence.
+
+**1. Apply the migrations that are still pending.** The Supabase SQL editor runs a
+pasted script in one transaction, so it is a safe substitute for `supabase db push`:
+
+```bash
+npm run db:paste            # writes supabase/paste-pending.sql
+```
+
+Then Supabase → *SQL Editor* → *New query*, paste `supabase/paste-pending.sql`, Run.
+It contains only the migrations added after the database went live, so re-running
+it will not collide with objects that already exist. It is generated rather than
+committed, so it is never stale — rebuild it whenever migrations change. Use
+`npm run db:paste -- 02100 02200` to choose migrations by prefix, or
+`npm run db:paste -- all` for a fresh database.
+
+**2. Deploy the `manage-staff` function.** Until this happens the function does
+not exist and `/functions/v1/manage-staff` answers `404 NOT_FOUND` — that 404 is
+the whole cause of the "CORS error" in the browser console, not a CORS
+configuration problem. With the CLI:
+
+```bash
+supabase secrets set ALLOWED_REDIRECT_ORIGINS=https://your-domain,https://*.vercel.app
+supabase functions deploy manage-staff
+```
+
+`ALLOWED_REDIRECT_ORIGINS` is an Edge Function secret, not a Vercel variable.
+Without it the function refuses every browser origin with a 403 and logs a warning
+on cold start. Without the CLI, the function can only be deployed from the
+dashboard's *Edge Functions* section, and a secret must be added there under
+*Secrets*.
+
+**3. Add the reset-password redirect.** Recovery emails point at
+`/admin/reset-password`, which is a different path from `/admin/login`. Supabase
+Auth → *URL Configuration* → *Redirect URLs* needs each production origin
+followed by `/admin/reset-password`, unless a `/**` wildcard already covers it.
+
+**4. Create the first admin.** This is the only step that needs a value from the
+Supabase dashboard (*Project Settings* → *API*): the service role key. Put it in
+`.env` alongside the two `VITE_` variables — see `.env.example` — then:
+
+```bash
+npm run admin:bootstrap -- owner@example.com
+```
+
+Until that account exists the console answers `400 invalid_credentials`. That
+400 is the correct response to any wrong or missing login, so it cannot be used to
+tell whether an account exists.
+
 Before going live:
 
 - [ ] Replace the demo business details and imagery (see step 4 above)

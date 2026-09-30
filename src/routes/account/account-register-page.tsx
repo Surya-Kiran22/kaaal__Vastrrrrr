@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import { motion } from 'framer-motion';
-import { AlertCircle, ArrowLeft, Eye, EyeOff, Lock, Mail, Phone, UserRound } from 'lucide-react';
+import { AlertCircle, ArrowLeft, Eye, EyeOff, Lock, Mail, UserRound } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -18,12 +18,6 @@ const schema = z
       .trim()
       .min(2, 'Please tell us your name.')
       .max(80, 'Name looks too long.'),
-    phone: z
-      .string()
-      .trim()
-      .min(1, 'Enter your mobile number.')
-      .max(20, 'Phone number looks too long.')
-      .regex(/^[+]?[\d\s-]{10,20}$/, 'Use digits, spaces, + or - only.'),
     email: z.string().trim().min(1, 'Enter your email address.').email('Enter a valid email address.'),
     password: z
       .string()
@@ -59,20 +53,17 @@ export function AccountRegisterPage() {
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { fullName: '', phone: '', email: '', password: '', confirmPassword: '' },
+    defaultValues: { fullName: '', email: '', password: '', confirmPassword: '' },
   });
 
   const onSubmit = handleSubmit(async (values) => {
     setFormError(null);
     try {
-      const result = await authController.signUp({
-        email: values.email,
-        password: values.password,
-        fullName: values.fullName,
-        // Digits only, matching what migration 019's trigger stores, so the
-        // client and the database agree on the value the unique index sees.
-        phone: values.phone.replace(/\D/g, ''),
-      });
+        const result = await authController.signUp({
+          email: values.email,
+          password: values.password,
+          fullName: values.fullName,
+        });
 
       if (result.needsVerification) {
         setPendingEmail(values.email);
@@ -180,31 +171,6 @@ export function AccountRegisterPage() {
                   className="pl-10"
                   aria-invalid={Boolean(errors.fullName)}
                   {...register('fullName')}
-                />
-              </div>
-            </Field>
-
-            <Field
-              label="Mobile number"
-              htmlFor="reg-phone"
-              required
-              hint="Required, and locked after signup"
-              error={errors.phone?.message}
-            >
-              <div className="relative">
-                <Phone
-                  className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-kv-dim"
-                  aria-hidden
-                />
-                <Input
-                  id="reg-phone"
-                  type="tel"
-                  inputMode="tel"
-                  autoComplete="tel"
-                  placeholder="98765 43210"
-                  className="pl-10"
-                  aria-invalid={Boolean(errors.phone)}
-                  {...register('phone')}
                 />
               </div>
             </Field>
