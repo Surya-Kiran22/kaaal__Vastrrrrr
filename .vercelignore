@@ -13,6 +13,7 @@
 # trims the upload and stops generated SQL bundles reaching the CDN.
 supabase/
 scripts/build-apply-all.mjs
+scripts/build-paste-pending.mjs
 scripts/build-drift-check.mjs
 scripts/verify-admin-bootstrap.mjs
 scripts/verify-customer-auth.mjs

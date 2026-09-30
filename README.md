@@ -508,6 +508,23 @@ are rejected for that host. `npm run build` should pass `--base=/` if the site
 is ever served from a subdirectory; the catch-all rewrite and the root-absolute
 asset paths in `dist/index.html` assume the domain root.
 
+**Check that a domain really reaches this app before debugging the build.** A
+domain can stay attached to whatever host it was pointed at first, so a custom
+domain can serve an entirely different site while the Vercel deployment is
+healthy. Two tells:
+
+```bash
+# A Vercel deployment answers with a region id and serves this app's title.
+curl -sSI https://your-project.vercel.app | grep -i x-vercel-id
+
+# A domain still pointing somewhere else will not.
+curl -sSI https://your-domain.example
+```
+
+Look for the store's own title, a redirect to a `*.myshopify.com` host, or a
+platform error page such as "Store unavailable" — those mean DNS has to be
+repointed, which is an account change no repository edit can make.
+
 ### Supabase Auth URLs
 
 Supabase Auth → *URL Configuration* must list the production URL in both
