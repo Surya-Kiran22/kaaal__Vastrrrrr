@@ -316,12 +316,14 @@ class AuthController {
   /**
    * Uploads a customer picture and points the profile at it.
    *
-   * The object key is `avatars/<user id>/<file>.<ext>`, and the first path
-   * segment must equal the caller's own id -- that is the constraint the
+   * The object key is `<user id>/<file>.<ext>`, and the first path segment must
+   * equal the caller's own id -- that is the constraint the
    * `profile_avatars_insert_own` RLS policy enforces, so a customer cannot
-   * overwrite somebody else's picture by crafting a key. The previous object is
-   * removed afterwards, but only on success: a failed delete must not lose the
-   * avatar the profile is already pointing at.
+   * overwrite somebody else's picture by crafting a key. There must be no folder
+   * in front of the user id, because the policy looks at segment `[1]` and would
+   * see that folder instead. The previous object is removed afterwards, but only
+   * on success: a failed delete must not lose the avatar the profile is already
+   * pointing at.
    */
   async uploadOwnAvatar(file: File): Promise<Profile | null> {
     const userId = this.state.session?.user?.id;
@@ -339,7 +341,11 @@ class AuthController {
     const previousPath = this.state.profile?.avatar_url ?? null;
     const extension = (file.name.split('.').pop() ?? 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '')
       || 'jpg';
-    const path = `avatars/${userId}/${Date.now()}.${extension}`;
+    // The user id is the FIRST path segment, with no bucket-level prefix in front
+    // of it: the policy checks `(storage.foldername(name))[1] = auth.uid()`, so an
+    // extra leading folder makes every upload fail with a row-level security
+    // violation for every customer.
+    const path = `${userId}/${Date.now()}.${extension}`;
 
     const { error: uploadError } = await supabase.storage
       .from(AVATAR_BUCKET)
