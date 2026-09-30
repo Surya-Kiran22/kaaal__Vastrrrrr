@@ -1,6 +1,7 @@
 import { Outlet, createRootRouteWithContext, useLocation, type ErrorComponentProps } from '@tanstack/react-router';
 import { motion, useReducedMotion } from 'framer-motion';
 import { CartDrawer } from '@/components/cart/cart-drawer';
+import { SessionTimeout } from '@/components/auth/session-timeout';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
 import { NotFound } from '@/components/layout/not-found';
@@ -57,6 +58,9 @@ function RootLayout() {
               <CartDrawer />
             </>
           )}
+          {/* Mounted once, outside the chrome split, so the idle timer runs on
+              both the storefront and the console. */}
+          <SessionTimeout />
         </div>
       </CartDrawerProvider>
     </CartProvider>
