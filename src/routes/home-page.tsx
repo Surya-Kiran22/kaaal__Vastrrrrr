@@ -1,14 +1,23 @@
 import { Link } from '@tanstack/react-router';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import { useRef } from 'react';
 import { ArrowRight, MessageCircle, ShieldCheck, Sparkles, Truck } from 'lucide-react';
 import { ProductCard } from '@/components/product/product-card';
 import { ProductSlideshow } from '@/components/product/product-slideshow';
 import { Marquee } from '@/components/marketing/marquee';
+import { HeroHeadline, type HeroLine } from '@/components/marketing/hero-headline';
+import { SpotlightGlow } from '@/components/marketing/spotlight-glow';
 import { Button } from '@/components/ui/button';
 import { ProductGridSkeleton } from '@/components/ui/states';
 import { Reveal } from '@/components/ui/reveal';
 import { useBusinessSettings, useCategories, useProducts } from '@/hooks/useProducts';
 import { WhatsAppGate } from '@/components/layout/whatsapp-gate';
+
+const HERO_LINES: HeroLine[] = [
+  { text: 'Clothing for people' },
+  { text: 'who prefer' },
+  { text: 'less, but better.', outline: true },
+];
 
 const PILLARS = [
   {
@@ -36,7 +45,20 @@ export function HomePage() {
   });
   const { data: newest = [], isPending: newestPending } = useProducts({ sort: 'newest' });
 
-    const reduceMotion = useReducedMotion();
+  const reduceMotion = useReducedMotion();
+  const heroRef = useRef<HTMLElement>(null);
+
+  // Scroll-linked hero: it drifts up and fades as the next section arrives. The
+  // range ends before the hero leaves the viewport so the last bit of the
+  // headline is not already invisible while it is still on screen.
+  const { scrollYProgress } = useScroll({
+    target: heroRef,
+    offset: ['start start', 'end start'],
+  });
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  const heroY = useTransform(scrollYProgress, [0, 1], [0, -80]);
+  // The background moves slower than the text, which is what reads as depth.
+  const heroImageY = useTransform(scrollYProgress, [0, 1], [0, 64]);
 
   // Fall back to the newest arrivals if nothing is flagged as featured.
   const showcase = (featured.length > 0 ? featured : newest).slice(0, 8);
@@ -59,18 +81,34 @@ export function HomePage() {
       {/* ------------------------------------------------------------------ */}
       {/* Hero                                                               */}
       {/* ------------------------------------------------------------------ */}
-      <section className="relative overflow-hidden border-b border-kv-line">
+      <motion.section
+        ref={heroRef}
+        style={reduceMotion ? undefined : { opacity: heroOpacity, y: heroY }}
+        className="relative overflow-hidden border-b border-kv-line"
+      >
         <div className="absolute inset-0">
-          <img
-            src={heroImage}
-            alt=""
-            aria-hidden
-            className="slow-zoom h-full w-full object-cover opacity-[0.22]"
-            fetchPriority="high"
-          />
+          {/* The parallax lives on a wrapper, not on the image. `slow-zoom` is a
+              CSS animation on `transform`, and CSS animations win over the inline
+              transform framer writes, so putting both on one element would leave the
+              parallax silently dead. The wrapper is taller than the section so the
+              drift never exposes an edge. */}
+          <motion.div
+            style={reduceMotion ? undefined : { y: heroImageY }}
+            className="absolute inset-x-0 -top-[10%] h-[120%]"
+          >
+            <img
+              src={heroImage}
+              alt=""
+              aria-hidden
+              className="slow-zoom h-full w-full object-cover opacity-[0.22]"
+              fetchPriority="high"
+            />
+          </motion.div>
           <div className="absolute inset-0 bg-gradient-to-b from-kv-bg/70 via-kv-bg/85 to-kv-bg" />
           <div className="absolute inset-0 bg-gradient-to-r from-kv-bg via-kv-bg/60 to-transparent" />
         </div>
+
+        <SpotlightGlow target={heroRef} />
 
         <div className="container-kv relative py-24 sm:py-32 lg:py-40">
           <div className="max-w-2xl">
@@ -83,15 +121,7 @@ export function HomePage() {
               {business?.tagline ?? 'Dark by design'}
             </motion.p>
 
-            <motion.h1
-              initial={reduceMotion ? false : { opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.08, ease: [0.22, 1, 0.36, 1] }}
-              className="heading-display mt-6 text-balance"
-            >
-              Clothing for people who prefer{' '}
-              <span className="text-outline">less, but better.</span>
-            </motion.h1>
+            <HeroHeadline lines={HERO_LINES} className="mt-6" />
 
             <motion.p
               initial={reduceMotion ? false : { opacity: 0, y: 18 }}
@@ -147,7 +177,7 @@ export function HomePage() {
             </motion.dl>
           </div>
         </div>
-      </section>
+      </motion.section>
 
       <Marquee />
 

@@ -4,6 +4,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Toaster } from 'sonner';
 import { SmoothScroll } from '@/components/layout/smooth-scroll';
+import { CustomCursor } from '@/components/layout/custom-cursor';
 import { authController } from '@/lib/auth-controller';
 import { queryClient, reportConfigurationStatus } from '@/lib/query-client';
 import { PrivacyProvider } from '@/lib/privacy';
@@ -27,6 +28,7 @@ createRoot(container).render(
     <PrivacyProvider>
       <QueryClientProvider client={queryClient}>
         <SmoothScroll />
+        <CustomCursor />
         <RouterProvider router={router} />
         <Toaster
           theme="dark"
