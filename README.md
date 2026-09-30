@@ -234,6 +234,11 @@ Enforcement lives in Postgres, not the UI:
   *Available* switch in the admin form, which is explicit and auditable.
 - `compare_at_price` is rejected by trigger unless it is greater than
   `selling_price`, and `slug` / `sku` are unique.
+- Stock is edited in two places. The product form rewrites the whole variant map,
+  and *Admin → Inventory* has an **Adjust** button per row for changing units
+  without touching anything else. Both write `variant_stock` only and leave `stock`
+  to the trigger. A movement history is not recorded: there is no ledger table, so
+  an adjustment replaces the previous count rather than being appended to it.
 
 ---
 
