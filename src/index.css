@@ -104,18 +104,22 @@
     @apply outline-none ring-2 ring-kv-white/70 ring-offset-2 ring-offset-kv-bg;
   }
 
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(var(--kv-rgb-silver) / 0.45) transparent;
+  }
   ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
   }
   ::-webkit-scrollbar-track {
     @apply bg-kv-bg;
   }
   ::-webkit-scrollbar-thumb {
-    @apply rounded-full border-[3px] border-solid border-kv-bg bg-kv-line;
+    @apply rounded-full border-[3px] border-solid border-kv-bg bg-kv-silver/40;
   }
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-kv-lineStrong;
+    @apply bg-kv-silver/70;
   }
 
   /* Hide number input spinners — quantity uses custom steppers. */
