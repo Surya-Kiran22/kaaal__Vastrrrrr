@@ -9,7 +9,7 @@ import { HeroHeadline, type HeroLine } from '@/components/marketing/hero-headlin
 import { SpotlightGlow } from '@/components/marketing/spotlight-glow';
 import { Button } from '@/components/ui/button';
 import { ProductGridSkeleton } from '@/components/ui/states';
-import { Reveal } from '@/components/ui/reveal';
+import { Reveal, StaggerItem, StaggerList } from '@/components/ui/reveal';
 import { useBusinessSettings, useCategories, useProducts } from '@/hooks/useProducts';
 import { WhatsAppGate } from '@/components/layout/whatsapp-gate';
 
@@ -158,25 +158,44 @@ export function HomePage() {
               ) : null}
             </motion.div>
 
-            <motion.dl
-              initial={reduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="mt-14 grid max-w-lg grid-cols-3 gap-6 border-t border-kv-line pt-7"
-            >
+            <dl className="mt-14 grid max-w-lg grid-cols-3 gap-6 border-t border-kv-line pt-7">
               {[
                 { label: 'GSM weight', value: '240–450' },
                 { label: 'Drops per year', value: '06' },
                 { label: 'Payment', value: 'On delivery' },
-              ].map((stat) => (
-                <div key={stat.label}>
+              ].map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.45 + index * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                >
                   <dt className="text-2xs uppercase tracking-widest text-kv-dim">{stat.label}</dt>
                   <dd className="mt-1.5 font-display text-lg text-kv-white">{stat.value}</dd>
-                </div>
+                </motion.div>
               ))}
-            </motion.dl>
+            </dl>
           </div>
         </div>
+
+        {reduceMotion ? null : (
+          <motion.div
+            aria-hidden
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2, duration: 0.8 }}
+            className="pointer-events-none absolute bottom-6 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-2 md:flex"
+          >
+            <span className="text-2xs uppercase tracking-widest text-kv-dim">Scroll</span>
+            <span className="relative block h-9 w-px overflow-hidden bg-kv-lineStrong/60">
+              <motion.span
+                className="absolute inset-x-0 top-0 block h-3 bg-kv-white/80"
+                animate={{ y: [-12, 36] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut', repeatDelay: 0.6 }}
+              />
+            </span>
+          </motion.div>
+        )}
       </motion.section>
 
       <Marquee />
@@ -187,25 +206,28 @@ export function HomePage() {
       {!categoriesPending && categories.length > 0 ? (
         <section className="border-b border-kv-line">
           <div className="container-kv py-10">
-            <div className="flex flex-wrap items-center gap-2.5">
+            <StaggerList className="flex flex-wrap items-center gap-2.5">
               <span className="eyebrow mr-1">Shop by</span>
-              <Link
-                to="/shop"
-                className="rounded-full border border-kv-line px-4 py-1.5 text-xs text-kv-silver transition-all duration-300 ease-premium hover:border-kv-white/50 hover:text-kv-white"
-              >
-                All
-              </Link>
-              {categories.map((category) => (
+              <StaggerItem index={0}>
                 <Link
-                  key={category}
                   to="/shop"
-                  search={{ category }}
                   className="rounded-full border border-kv-line px-4 py-1.5 text-xs text-kv-silver transition-all duration-300 ease-premium hover:border-kv-white/50 hover:text-kv-white"
                 >
-                  {category}
+                  All
                 </Link>
+              </StaggerItem>
+              {categories.map((category, index) => (
+                <StaggerItem key={category} index={index + 1}>
+                  <Link
+                    to="/shop"
+                    search={{ category }}
+                    className="rounded-full border border-kv-line px-4 py-1.5 text-xs text-kv-silver transition-all duration-300 ease-premium hover:border-kv-white/50 hover:text-kv-white"
+                  >
+                    {category}
+                  </Link>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerList>
           </div>
         </section>
       ) : null}
@@ -263,7 +285,7 @@ export function HomePage() {
           <div className="grid gap-10 md:grid-cols-3 md:gap-8">
             {PILLARS.map((pillar, index) => (
               <Reveal key={pillar.title} delay={index * 0.08}>
-                <div className="edge-light rounded-2xl border border-kv-line bg-kv-card p-7">
+                <div className="edge-light h-full rounded-2xl border border-kv-line bg-kv-card p-7 transition-all duration-300 ease-premium hover:-translate-y-1 hover:border-kv-lineStrong">
                   <pillar.icon className="h-5 w-5 text-kv-silver" aria-hidden />
                   <h3 className="mt-5 font-display text-xl tracking-tight text-kv-white">{pillar.title}</h3>
                   <p className="mt-2.5 text-sm leading-relaxed text-kv-muted">{pillar.body}</p>
